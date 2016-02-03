@@ -1,0 +1,85 @@
+{
+  "id": "6981850",
+  "name": "VM1",
+  "runstate": "stopped",
+  "hardware": {
+    "cpus": 1,
+    "supports_multicore": true,
+    "cpus_per_socket": 1,
+    "ram": 1024,
+    "svms": 1,
+    "guestOS": "ubuntu-64",
+    "max_cpus": 12,
+    "min_ram": 256,
+    "max_ram": 131072,
+    "vnc_keymap": null,
+    "uuid": null,
+    "disks": [
+      {
+        "id": "disk-3089616-7086702-scsi-0-0",
+        "size": 20480,
+        "type": "SCSI",
+        "controller": "0",
+        "lun": "0"
+      }
+    ],
+    "storage": 20480,
+    "upgradable": false,
+    "instance_type": null,
+    "time_sync_enabled": true,
+    "copy_paste_enabled": true,
+    "nested_virtualization": false
+  },
+  "error": false,
+  "asset_id": null,
+  "hardware_version": 10,
+  "interfaces": [
+    {
+      "id": "nic-3089616-7086702-0",
+      "ip": "10.0.0.1",
+      "hostname": "host-1",
+      "mac": "00:50:56:14:34:E4",
+      "services_count": 0,
+      "services": [],
+      "public_ips_count": 0,
+      "public_ips": [],
+      "vm_id": "6981850",
+      "vm_name": "Ubuntu Server 14.04 - 64-bit",
+      "status": "Running",
+      "nat_addresses": {
+        "network_nat_addresses": [],
+        "vpn_nat_addresses": [
+          {
+            "ip_address": "3.4.5.6",
+            "vpn_id": "vpn-123",
+            "vpn_name": "my VPN",
+            "vpn_url": "https://example.com/vpns/vpn-123"
+          }
+        ]
+      },
+      "network_id": "3288116",
+      "network_name": "Default Network",
+      "network_url": "https://example.com/templates/5570024/networks/3288116",
+      "network_type": "automatic",
+      "network_subnet": "10.0.0.0/24",
+      "nic_type": "vmxnet3",
+      "promiscuous": false,
+      "secondary_ips": []
+    }
+  ],
+  "notes": [],
+  "labels": [],
+  "credentials": [
+    {
+      "id": "5695620",
+      "text": "xxx / yyy"
+    }
+  ],
+  "desktop_resizable": true,
+  "local_mouse_cursor": true,
+  "maintenance_lock_engaged": false,
+  "region_backend": "skytap",
+  "created_at": "2015/09/24 14:10:55 -0700",
+  "can_change_object_state": true,
+  "template_url": "https://example.com/templates/5570024"
+}

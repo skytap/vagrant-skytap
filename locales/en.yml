@@ -1,0 +1,174 @@
+en:
+  vagrant_skytap:
+    already_status: |-
+      The machine is already %{status}.
+
+    running_environment: |-
+      Starting VMs ...
+    launching_vm: |-
+      Launching a VM with the following settings...
+    not_created: |-
+      Instance is not created. Please run `vagrant up` first.
+    ready: |-
+      Machine is booted and ready for use!
+    rsync_not_found_warning: |-
+      Warning! Folder sync disabled because the rsync binary is missing in the %{side}.
+      Make sure rsync is installed and the binary can be found in the PATH.
+    rsync_folder: |-
+      Rsyncing folder: %{hostpath} => %{guestpath}
+    starting: |-
+      Starting the instance...
+    stopping: |-
+      Stopping the instance...
+    terminating: |-
+      Terminating the instance...
+    resuming: |-
+      Resuming the suspended instance ...
+    waiting_for_ready: |-
+      Waiting for instance to become "ready"...
+    waiting_for_ssh: |-
+      Waiting for SSH to become available...
+    warn_networks: |-
+      Warning! The Skytap provider doesn't support any of the Vagrant
+      high-level network configurations (`config.vm.network`). They
+      will be silently ignored.
+    warn_ssh_access: |-
+      Warning! Vagrant might not be able to SSH into the instance.
+      Please check your security groups settings.
+    will_not_destroy: |-
+      The instance '%{name}' will not be destroyed, since the confirmation
+      was declined.
+    environment_url: |-
+      New Skytap environment created: %{url}
+    graceful_halt_environment_failed: |-
+      The environment could not be halted gracefully. Forcing halt.
+    graceful_halt_vm_failed: |-
+      The VM could not be halted gracefully. Forcing halt.
+
+    config:
+      username_required:
+        A Skytap username must be specified via "username" or in the
+        VAGRANT_SKYTAP_USERNAME environment variable.
+      api_token_required:
+        A Skytap API token must be specified via "api_token" or in the
+        VAGRANT_SKYTAP_API_TOKEN environment variable.
+      vm_url_required:
+        The URL of a Skytap VM must be specified via "vm_url"
+
+    errors:
+      instance_ready_timeout: |-
+        The instance never became "ready" in Skytap. The timeout currently
+        set waiting for the instance to become ready is %{timeout} seconds.
+        Please verify that the machine properly boots. If you need more time
+        set the `instance_ready_timeout` configuration on the Skytap provider.
+      rsync_error: |-
+        There was an error when attempting to rsync a shared folder.
+        Please inspect the error message below for more info.
+
+        Host path: %{hostpath}
+        Guest path: %{guestpath}
+        Error: %{stderr}
+      mkdir_error: |-
+        There was an error when attempting to create a shared host folder.
+        Please inspect the error message below for more info.
+
+        Host path: %{hostpath}
+        Error: %{err}
+
+      does_not_exist: |-
+        %{object_name} was not found.
+
+      operation_failed: |-
+        The operation failed: %{err}
+
+      vpn_connection_failed: |-
+        Could not connect to the VPN.
+
+      source_vm_not_stopped: |-
+        You cannot bring up the machine using the VM %{url} because the VM is running or suspended.
+
+      resource_busy: |-
+        This operation failed because the resource was busy: %{err}
+
+      rate_limited: |-
+        This operation failed due to rate limiting: %{err}
+
+      unprocessable_entity: |-
+        The operation failed: %{err}
+
+      no_connection_options: |-
+        There were no available options for connecting to the VM.
+        Currently, the provider supports connections over VPN only.
+
+      bad_vm_url: |-
+        The specified vm_url was invalid: %{url}
+
+      not_template_vm: |-
+        The specified VM %{url} belongs to an environment, not a template. Using environment VMs is not currently supported.
+
+      region_mismatch: |-
+        A VM from the '%{vm_region}' region cannot be added to an environment in the '%{environment_region}' region.
+
+      vm_parent_mismatch: |-
+        The provided VMs (%{vm_ids}) do not belong to the same environment or template.
+        (This is a bug which should be reported.)
+
+      feature_not_supported_for_host_os: |-
+        The %{feature_name} feature is currently not supported for your host operating system.
+
+    states:
+      short_not_created: |-
+        not created
+      long_not_created: |-
+        The Skytap instance is not created. Run `vagrant up` to create it.
+
+      short_stopped: |-
+        stopped
+      long_stopped: |-
+        The Skytap instance is stopped. Run `vagrant up` to start it.
+
+      short_suspended: |-
+        suspended
+      long_suspended: |-
+        The Skytap instance is suspended. Run `vagrant up` or `vagrant resume` to resume.
+
+      short_running: |-
+        running
+      long_running: |-
+        The Skytap instance is running. To stop this machine, you can run
+        `vagrant halt`. To destroy the machine, you can run `vagrant destroy`.
+
+      short_busy: |-
+        busy
+      long_busy: |-
+        The Skytap instance is busy. Wait for the current operation to complete.
+
+    commands:
+      publish_urls:
+        list: |-
+          The VMs in this Skytap environment can be accessed through the
+          following published URL(s):
+          %{publish_urls}
+        empty_list: |-
+          No published URLs were found for this Skytap environment. Run
+          `vagrant publish-url create` to create one.
+        created: |-
+          This Skytap environment (or the specified subset of VMs) can be
+          accessed at the following URL: %{url}
+          Note that anyone with this URL and password will have full control
+          of the VMs until the published URL is deleted. (Finer-grained
+          control is available through the Skytap UI.)
+        already_exists: |-
+          There is already a published URL for this Skytap environment.
+          To modify the published URL, please delete it and create a new
+          one. (Finer-grained control is available through the Skytap UI.)
+        confirm_delete: |-
+          This action will delete ALL published URLs for this Skytap
+          environment, including those created through the Skytap UI.
+          Are you sure you wish to do this? [yN]
+        deleted: |-
+          All published URLs for this Skytap environment (including those
+          created through the Skytap UI) have been deleted. Users cannot
+          manage these VMs, or access them through SmartClient, unless they
+          have a Skytap user account with appropriate permissions.
+

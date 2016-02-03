@@ -1,0 +1,17 @@
+{
+  "id": "3288116",
+  "url": "https://example.com/templates/5570024/networks/3288116",
+  "name": "Default Network",
+  "network_type": "automatic",
+  "subnet": "10.0.0.0/24",
+  "subnet_addr": "10.0.0.0",
+  "subnet_size": 24,
+  "gateway": "10.0.0.254",
+  "primary_nameserver": null,
+  "secondary_nameserver": null,
+  "region": "US-West",
+  "domain": "skytap.example",
+  "vpn_attachments": [],
+  "tunnelable": false,
+  "tunnels": []
+}

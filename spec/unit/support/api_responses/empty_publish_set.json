@@ -1,0 +1,19 @@
+{
+  "id": "1501798",
+  "name": "Vagrant publish set",
+  "url": "http://example.com/configurations/5570024/publish_sets/1501798",
+  "publish_set_type": "single_url",
+  "runtime_limit": null,
+  "runtime_left_in_seconds": null,
+  "expiration_date": null,
+  "expiration_date_tz": null,
+  "start_time": null,
+  "end_time": null,
+  "time_zone": null,
+  "multiple_url": false,
+  "password": null,
+  "desktops_url": "http://example.com/vms/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/desktops",
+  "use_smart_client": true,
+  "vms": [],
+  "custom_content_enabled": false
+}

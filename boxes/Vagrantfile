@@ -1,0 +1,8 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.provider :skytap do |skytap|
+    skytap.vm_url = "https://cloud.skytap.com/vms/3157858"
+  end
+end

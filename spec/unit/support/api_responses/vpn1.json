@@ -1,0 +1,26 @@
+{
+  "id": "vpn-123",
+  "url": "https://example.com/vpns/123",
+  "name": "my VPN",
+  "status": "active",
+  "enabled": true,
+  "remote_subnets": [
+    {
+      "id": "10.1.0.0/24",
+      "cidr_block": "10.1.0.0/24",
+      "excluded": false
+    }
+  ],
+  "local_subnet": "10.1.128.0/19",
+  "nat_local_subnet": true,
+  "route_based": false,
+  "error": null,
+  "local_peer_ip": "2.3.4.5",
+  "remote_peer_ip": "1.2.3.4",
+  "attached_network_count": 264,
+  "connected_network_count": 1,
+  "network_attachments": [],
+  "test_results": {},
+  "region": "US-West",
+  "region_backend": "skytap"
+}

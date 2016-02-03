@@ -1,0 +1,18 @@
+{
+  "id": "1-vpn-1",
+  "connected": true,
+  "network": {
+    "id": "3288116",
+    "subnet": "10.0.0.0/24",
+    "network_name": "Default Network",
+    "configuration_id": "5570024"
+  },
+  "vpn": {
+    "id": "vpn-123",
+    "name": "my VPN",
+    "enabled": true,
+    "nat_enabled": true,
+    "remote_subnets": "10.1.0.0/24",
+    "remote_peer_ip": "1.2.3.4"
+  }
+}

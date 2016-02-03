@@ -1,0 +1,19 @@
+{
+  "id": "5570024",
+  "url": "https://example.com/configurations/5570024",
+  "name": "Environment 1",
+  "error": "",
+  "runstate": "running",
+  "description": "",
+  "suspend_on_idle": 86400,
+  "routable": false,
+  "vms": [],
+  "networks": [],
+  "lockversion": "60afa50045216f791278c10285a3a82bb1e4c5b8",
+  "use_smart_client": true,
+  "disable_internet": false,
+  "region": "US-West",
+  "region_backend": "skytap",
+  "owner": "https://example.com/users/15386",
+  "publish_sets": []
+}
