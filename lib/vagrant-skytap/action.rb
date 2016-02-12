@@ -63,6 +63,7 @@ module VagrantPlugins
       # This action is called to terminate the remote machine.
       def self.action_destroy
         Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
           b.use action_fetch_environment
           b.use Call, ExistenceCheck do |env, b1|
             case existence_state = env[:result]
@@ -98,6 +99,7 @@ module VagrantPlugins
       # This action is called when `vagrant provision` is called.
       def self.action_provision
         Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
           b.use action_fetch_environment
           b.use Call, ExistenceCheck do |env, b1|
             case result = env[:result]
@@ -228,6 +230,7 @@ module VagrantPlugins
       def self.action_create
         Vagrant::Action::Builder.new.tap do |b|
           b.use HandleBox
+          b.use ConfigValidate
           b.use action_fetch_environment
           b.use ComposeEnvironment
         end
@@ -281,6 +284,7 @@ module VagrantPlugins
 
       def self.action_reload
         Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
           b.use action_fetch_environment
           b.use Call, ExistenceCheck do |env, b1|
             case env[:result]
@@ -300,7 +304,6 @@ module VagrantPlugins
 
       def self.action_fetch_environment
         Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
           b.use InitializeAPIClient
           b.use FetchEnvironment
         end
