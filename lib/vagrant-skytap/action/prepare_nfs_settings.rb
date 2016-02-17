@@ -44,7 +44,9 @@ module VagrantPlugins
         end
 
         def using_nfs?
-          @machine.config.vm.synced_folders.any? { |_, opts| opts[:type] == :nfs }
+          @machine.config.vm.synced_folders.any? { |_, opts| opts[:type] == :nfs }.tap do |ret|
+            @logger.debug("PrepareNFSSettings#using_nfs? returning #{ret}. Synced folders: #{@machine.config.vm.synced_folders.inspect}")
+          end
         end
 
         # Returns the IP address of the host, preferring one on an interface which
@@ -54,7 +56,7 @@ module VagrantPlugins
             s.connect(machine.ssh_info[:host], 1)
             s.addr.last
           end.tap do |ret|
-            @logger.debug "read_host_ip returning #{ret}"
+            @logger.debug("PrepareNFSSettings#read_host_ip returning #{ret}")
           end
         end
 
