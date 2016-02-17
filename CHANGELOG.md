@@ -1,3 +1,13 @@
+# 0.2.6 (February 16, 2016)
+
+* Changes to support logging in to base boxes with the default `vagrant` user and
+  insecure keypair. Previously, if the SSH username and password were omitted
+  from the `Vagrantfile`, the user was prompted to enter them. We now default
+  to the `vagrant` login. If the source VM (image) has saved credentials
+  (a Skytap-specific feature; see [Accessing and Saving VM Credentials](http://help.skytap.com/#VM_Settings_Credentials.html))
+  then the user will be shown a menu of the stored credentials,
+  as well as an option for the default `vagrant` login.
+
 # 0.2.5 (February 3, 2016)
 
 * Initial push to GitHub. Random cleanup, including getting rid of some unused test files.
