@@ -66,74 +66,54 @@ module VagrantPlugins
 
       def ask_credentials
         @logger.debug("ask_credentials")
-        return if username && password
 
-        env[:ui].info("Note that the machine password will be stored in " \
-                      "cleartext on your local filesystem.")
-
-        creds = current_vm.credentials.select(&:recognized?)
-
-        if username
-          env[:ui].info("SSH username found in Vagrantfile: #{username}")
-          match = creds.detect{|c| c.username == username}
-
-          if match
-            @logger.info("Found username in Vagrantfile. Using matching password from credentials.")
-            env[:ui].info("Matched SSH password in Skytap VM credentials.")
-            @password = match.password
-          else
-            @logger.info("Found username in Vagrantfile. Will use manual password entry.")
-          end
-        elsif creds.present?
-          question = "How do you want to choose SSH credentials for machine '#{@machine.name}'?"
-          choices = creds.collect do |c|
-            "Use VM credentials stored in Skytap: #{c}"
-          end
-          choices << 'Type credentials manually'
-
-          ask_from_list(question, choices, 0) do |i|
-            if cred = creds[i]
-              @username = cred.username
-              @password = cred.password
+        if !username
+          creds = current_vm.credentials.select(&:recognized?)
+          if creds.present?
+            question = "How do you want to choose SSH credentials for machine '#{@machine.name}'?\n" \
+              "Note that credentials retrieved from the Skytap VM will be stored in cleartext on your local filesystem."
+            ask_from_list(question, credentials_choices(creds), 0) do |i|
+              if cred = creds[i]
+                @username = cred.username
+                @password = cred.password
+              end
             end
+          else
+            @logger.info("No login credentials found for the VM. Allowing fallback to default vagrant login.")
           end
-        else
-          @logger.info("No login credentials found for the VM. Prompting for manual username/password entry.")
         end
-
-        @username ||= ask_username
-        @password ||= ask_password
+        [@username, @password]
       end
 
-      def ask_username
-        @username = ask('Enter SSH username:').strip
-      end
-
-      def ask_password
-        @password = ask('Enter SSH password (no output will appear):', echo: false).strip
+      def credentials_choices(creds)
+        creds.collect do |c|
+          "Use VM credentials stored in Skytap: #{c}"
+        end.tap do |choices|
+          choices << "Don't specify credentials: Use standard 'vagrant' login with insecure keypair"
+        end
       end
 
       def ask_routing
         @logger.debug("ask_routing")
-        return if host && port
+        unless host && port
+          iface = current_vm.interfaces.first
+          choices = connection_choices(iface).select(&:valid?)
+          raise Errors::NoConnectionOptions unless choices.present?
 
-        iface = current_vm.interfaces.first
-        choices = connection_choices(iface).select(&:valid?)
-        raise Errors::NoConnectionOptions unless choices.present?
-
-        if vpn_url = @provider_config.vpn_url
-          choice = choices.detect do |choice|
-            choice.vpn && vpn_url.include?(choice.vpn.id)
+          if vpn_url = @provider_config.vpn_url
+            choice = choices.detect do |choice|
+              choice.vpn && vpn_url.include?(choice.vpn.id)
+            end
+            raise Errors::DoesNotExist, object_name: vpn_url unless choice
+            @host, @port = choice.choose
+          else
+            question = "How do you want to connect to machine '#{@machine.name}'?"
+            ask_from_list(question, choices, 0) do |i, choice|
+              @host, @port = choice.choose
+            end
           end
-          raise Errors::DoesNotExist, object_name: vpn_url unless choice
-          @host, @port = choice.choose
-          return
         end
-
-        question = "How do you want to connect to machine '#{@machine.name}'?"
-        ask_from_list(question, choices, 0) do |i, choice|
-          @host, @port = choice.choose
-        end
+        [@host, @port]
       end
 
       def connection_choices(iface)
