@@ -1,3 +1,9 @@
+# 0.2.7 (February 19, 2016)
+
+* Add User-Agent string with the plugin version and Vagrant version.
+
+* Fix bug which coud cause machines to be mapped to the wrong VMs.
+
 # 0.2.6 (February 16, 2016)
 
 * Changes to support logging in to base boxes with the default `vagrant` user and
