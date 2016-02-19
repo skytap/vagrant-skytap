@@ -36,4 +36,13 @@ shared_context "rest_api" do
 
   let(:base_url) {"http://example.com/"}
 
+  %i[get post put delete].each do |verb|
+    define_method("stub_#{verb}") do |url_matcher, response_attrs = nil|
+      stub_request(verb, url_matcher).to_return(body: JSON.dump(response_attrs), status: 200)
+    end
+  end
+
+  before do
+    stub_request(:any, /.*/).to_return(body: "{}", status: 200)
+  end
 end

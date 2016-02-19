@@ -20,7 +20,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'log4r'
 require 'vagrant-skytap/api/environment'
 require 'vagrant-skytap/api/vm'
 
@@ -70,6 +69,7 @@ module VagrantPlugins
         # @return [API::Environment] The new or existing environment
         def add_vms(environment, machines)
           source_vms_map = fetch_source_vms(machines)
+          names_to_vm_ids = {}
 
           get_groupings(source_vms_map, parallel: @env[:parallel]).each do |names|
             vms_for_pass = names.collect{|name| source_vms_map[name]}
@@ -84,9 +84,11 @@ module VagrantPlugins
               vms = environment.add_vms(vms_for_pass)
             end
 
-            machines.select{|m| names.include?(m.name)}.each_with_index do |machine, i|
-              machine.id = vms[i].id
-            end
+            vms.each_with_index {|vm, i| names_to_vm_ids[names[i]] = vm.id }
+          end
+
+          machines.each do |machine|
+            machine.id = names_to_vm_ids[machine.name]
           end
 
           environment
@@ -129,15 +131,18 @@ module VagrantPlugins
             acc
           end.values
 
-          # If the same source VM appears more than once, the API
-          # requires us to make multiple calls. For simplicity,
-          # if a particular grouping includes such, just create a single
-          # call for each vm in the group. (Could be optimized further)
           groupings2 = []
           groupings.each_with_index do |grouping, i|
             if grouping.values.uniq.count == grouping.values.count
-              groupings2 << grouping.keys
+              # The new VMs in the API response will be sorted
+              # by the source VM ids. Sort the machines within
+              # each group to match.
+              groupings2 << grouping.invert.sort.collect(&:last)
             else
+              # If the same source VM appears more than once in a
+              # group, we have to make multiple API calls. For
+              # simplicity, handle this case by creating a single
+              # group for each machine.
               groupings2.concat(grouping.keys.map{|v| [v]})
             end
           end
