@@ -129,16 +129,12 @@ module VagrantPlugins
 
         private
 
-        def user_agent_string
-          "Vagrant-Skytap/#{VERSION} Vagrant/#{Vagrant::VERSION}"
-        end
 
         def default_headers
           {
             'Authorization' => auth_header,
             'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'User-Agent' => user_agent_string,
+            'Accept' => 'application/json'
           }
         end
 
