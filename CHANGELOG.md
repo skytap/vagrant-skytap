@@ -1,3 +1,7 @@
+# 0.2.8 (February 24, 2016)
+
+* Revert change to User-Agent string, which contained a bug.
+
 # 0.2.7 (February 19, 2016)
 
 * Add User-Agent string with the plugin version and Vagrant version.
