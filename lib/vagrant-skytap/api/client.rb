@@ -21,6 +21,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 require 'base64'
+require "vagrant-skytap/version"
 
 module VagrantPlugins
   module Skytap
@@ -130,7 +131,7 @@ module VagrantPlugins
         private
 
         def user_agent_string
-          "Vagrant-Skytap/#{VERSION} Vagrant/#{Vagrant::VERSION}"
+          "Vagrant-Skytap/#{VagrantPlugins::Skytap::VERSION} Vagrant/#{Vagrant::VERSION}"
         end
 
         def default_headers
