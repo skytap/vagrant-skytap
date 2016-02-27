@@ -43,14 +43,25 @@ module VagrantPlugins
           @app.call(env)
         end
 
+        # Determine whether there are enabled synced folders defined
+        # for this machine which are either of type :nfs, or of the
+        # default type (Vagrant may choose NFS as the default).
+        # https://github.com/mitchellh/vagrant/issues/4192
+        #
+        # @return [Boolean]
         def using_nfs?
-          @machine.config.vm.synced_folders.any? { |_, opts| opts[:type] == :nfs }.tap do |ret|
-            @logger.debug("PrepareNFSSettings#using_nfs? returning #{ret}. Synced folders: #{@machine.config.vm.synced_folders.inspect}")
+          machine.config.vm.synced_folders.any? do |_, opts|
+            (opts[:type] == :nfs || opts[:type].blank?) unless opts[:disabled]
+          end.tap do |ret|
+            @logger.debug("PrepareNFSSettings#using_nfs? returning #{ret}. "\
+              "Synced folders: #{machine.config.vm.synced_folders.inspect}")
           end
         end
 
-        # Returns the IP address of the host, preferring one on an interface which
-        # the client can route to.
+        # Returns the IP address of the host, preferring one on an interface
+        # which the client can route to.
+        #
+        # @return [String]
         def read_host_ip
           UDPSocket.open do |s|
             s.connect(machine.ssh_info[:host], 1)
@@ -60,6 +71,9 @@ module VagrantPlugins
           end
         end
 
+        # Returns the IP address of the guest VM.
+        #
+        # @return [String]
         def read_machine_ip
           machine.ssh_info[:host]
         end
