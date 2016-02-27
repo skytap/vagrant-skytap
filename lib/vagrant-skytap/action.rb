@@ -38,7 +38,20 @@ module VagrantPlugins
               b1.use MessageNotCreated
             else
               b1.use ClearForwardedPorts
-              b1.use StopVm
+              # May not halt suspended machines without --force flag
+              b1.use Call, IsSuspended do |env2, b2|
+                if env2[:result]
+                  b2.use Call, IsEnvSet, :force_halt do |env3, b3|
+                    if env3[:result]
+                      b3.use StopVm
+                    else
+                      b3.use Message, I18n.t("vagrant_skytap.commands.halt.not_allowed_if_suspended")
+                    end
+                  end
+                else
+                  b2.use StopVm
+                end
+              end
             end
           end
         end
@@ -53,8 +66,14 @@ module VagrantPlugins
             when :missing_environment, :missing_vm, :no_vms
               b1.use MessageNotCreated
             else
-              b1.use ClearForwardedPorts
-              b1.use SuspendVm
+              b1.use Call, IsRunning do |env2, b2|
+                if env2[:result]
+                  b2.use ClearForwardedPorts
+                  b2.use SuspendVm
+                else
+                  b2.use Message, I18n.t("vagrant_skytap.commands.suspend.only_allowed_if_running")
+                end
+              end
             end
           end
         end
