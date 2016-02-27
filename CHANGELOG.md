@@ -1,3 +1,12 @@
+# 0.2.9 (February 26, 2016)
+
+* Re-add User-Agent string.
+* Set NFS host/guest IP addresses for synced folders of unspecified type
+  (Vagrant can choose NFS as the default type, which resulted in an
+  error).
+* Don't allow suspending stopped VMs. Don't allow halting suspended VMs
+  without the --force flag.
+
 # 0.2.8 (February 24, 2016)
 
 * Revert change to User-Agent string, which contained a bug.
@@ -6,7 +15,7 @@
 
 * Add User-Agent string with the plugin version and Vagrant version.
 
-* Fix bug which coud cause machines to be mapped to the wrong VMs.
+* Fix bug which could cause machines to be mapped to the wrong VMs.
 
 # 0.2.6 (February 16, 2016)
 
