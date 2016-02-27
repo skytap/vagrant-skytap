@@ -171,4 +171,16 @@ en:
           created through the Skytap UI) have been deleted. Users cannot
           manage these VMs, or access them through SmartClient, unless they
           have a Skytap user account with appropriate permissions.
-
+      halt:
+        not_allowed_if_suspended: |-
+          Suspended machines cannot be halted gracefully. Run `vagrant up`
+          or `vagrant resume` to run the machine before halting. Alternately,
+          you may power off the machine with `vagrant halt --force`, but
+          data corruption may occur.
+      suspend:
+        only_allowed_if_running: |-
+          Only running machines may be suspended. Run `vagrant up` before
+          suspending this machine.
+      resume:
+        only_allowed_if_suspended: |-
+          Only suspended machines may be resumed.
