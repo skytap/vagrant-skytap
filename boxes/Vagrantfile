@@ -3,6 +3,7 @@
 
 Vagrant.configure(2) do |config|
   config.vm.provider :skytap do |skytap|
-    skytap.vm_url = "https://cloud.skytap.com/vms/3157858"
+    # Ubuntu 12.04 LTS Server (64-bit) in US-West region.
+    skytap.vm_url = "https://cloud.skytap.com/vms/8350530"
   end
 end
