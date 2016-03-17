@@ -1,3 +1,7 @@
+# 0.2.10 (March 17, 2016)
+
+* Fix bug in port forwarding messaging.
+
 # 0.2.9 (February 26, 2016)
 
 * Re-add User-Agent string.
@@ -53,7 +57,7 @@
 * Add support for port forwarding on Linux and BSD hosts using AutoSSH
   (TCP only).
 
-* 0.1.12 (December 23, 2015)
+# 0.1.12 (December 23, 2015)
 
 * Backward-compatibility fix.
 
