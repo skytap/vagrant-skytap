@@ -86,6 +86,11 @@ module VagrantPlugins
           end
         end
 
+        def nat_address_for_network(network)
+          nat_address = network_nat_addresses.find{|addr| addr['network_id'].to_i == network.id.to_i}
+          nat_address['ip_address'] if nat_address
+        end
+
         def vpn_attachments
           if network
             network.vpn_attachments
@@ -96,6 +101,10 @@ module VagrantPlugins
 
         def vpn_nat_addresses
           nat_addresses['vpn_nat_addresses'] || []
+        end
+
+        def network_nat_addresses
+          nat_addresses['network_nat_addresses'] || []
         end
 
         def nat_addresses

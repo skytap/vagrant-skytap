@@ -20,26 +20,29 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require 'vagrant-skytap/connection'
 
 module VagrantPlugins
   module Skytap
     module API
-      class PublishedService < Resource
-        include Connectable
-
-        attr_reader :interface
-
-        reads :id, :internal_port, :external_ip, :external_port
-
-        def self.rest_name
-          "published_service"
+      module Connectable
+        # Determine the corresponding [Connection::Choice] subclass for this
+        # resource type; e.g. for [API::Vpn] this would return
+        # [Connection::VpnChoice]. This method may be overridden where the
+        # class name varies from this pattern.
+        #
+        # @return [Class]
+        def connection_choice_class
+          require "vagrant-skytap/connection/#{self.class.rest_name}_choice"
+          Class.const_get("VagrantPlugins::Skytap::Connection::#{self.class.name.split('::').last}Choice")
         end
 
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
+        # Return a choice object representing the potential to connect
+        # via this resource. Arguments depend on resource type.
+        #
+        # @return [Connection::Choice]
+        def choice_for_setup(*args)
+          connection_choice_class.new(env, self, *args)
         end
       end
     end

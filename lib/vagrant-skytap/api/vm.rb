@@ -32,7 +32,6 @@ module VagrantPlugins
         include RunstateOperations
 
         attr_reader :provider_config
-        attr_reader :environment
 
         reads :id, :interfaces, :credentials, :name, :configuration_url, :template_url
 
@@ -46,7 +45,7 @@ module VagrantPlugins
 
         def initialize(attrs, environment, env)
           super
-          @environment = environment
+          @parent = environment
           @provider_config = env[:machine].provider_config
         end
 
@@ -60,6 +59,14 @@ module VagrantPlugins
           @interfaces ||= (get_api_attribute('interfaces') || []).collect do |iface_attrs|
             Interface.new(iface_attrs, self, env)
           end
+        end
+
+        def get_interfaces_by_id(ids)
+          interfaces.select{|iface| ids.include?(iface.id)}
+        end
+
+        def get_interface_by_id(id)
+          get_interfaces_by_id([id]).first
         end
 
         def credentials
@@ -93,6 +100,7 @@ module VagrantPlugins
         def parent
           @parent ||= Environment.fetch(env, parent_url)
         end
+        alias_method :environment, :parent
 
         def region
           @region ||= parent.region

@@ -20,28 +20,38 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require File.expand_path("../../base", __FILE__)
+require 'vagrant-skytap/connection/public_ip_choice'
 
-module VagrantPlugins
-  module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
+describe VagrantPlugins::Skytap::Connection::PublicIpChoice do
+  include_context "skytap"
 
-        attr_reader :interface
+  let(:env)             { {} }
+  let(:ip_address)      { '10.5.0.1' }
+  let(:port)            { 22 }
+  let(:host_port_tuple) { [ip_address, port] }
+  let(:ip)              { double(:ip, address: ip_address, :attached? => false) }
+  let(:interface)       { double(:interface, id: 1, attach_public_ip: nil) }
 
-        reads :id, :internal_port, :external_ip, :external_port
+  let(:instance) { described_class.new(env, ip, interface) }
 
-        def self.rest_name
-          "published_service"
-        end
+  describe "choose" do
+    subject { instance.choose }
 
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
-        end
+    context "when not attached" do
+      before do
+        expect(interface).to receive(:attach_public_ip)
       end
+      it { should == host_port_tuple }
+    end
+
+    context "when attached" do
+      before do
+        allow(ip).to receive(:attached?).and_return(true)
+        expect(interface).to_not receive(:attach_public_ip)
+      end
+      it { should == host_port_tuple }
     end
   end
 end
+

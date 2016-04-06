@@ -100,7 +100,7 @@ module VagrantPlugins
         attr_reader :provider_config
         attr_reader :vms, :networks
 
-        reads :id, :name, :vms, :networks, :region, :runstate, :url, :region
+        reads :id, :name, :vms, :networks, :region, :runstate, :url, :routable
 
         def initialize(attrs, env)
           super
@@ -131,10 +131,6 @@ module VagrantPlugins
           @publish_sets ||= (get_api_attribute('publish_sets') || []).collect do |ps_attrs|
             PublishSet.new(ps_attrs, self, env)
           end
-        end
-
-        def region
-          get_api_attribute('region')
         end
 
         def refresh(attrs)
@@ -184,6 +180,15 @@ module VagrantPlugins
 
         def properties
           @properties ||= EnvironmentProperties.new(env[:machine].env.local_data_path)
+        end
+
+        # Indicates whether traffic will be routed between networks within this
+        # environment. (This is different from routing traffic to/from a network
+        # within another environment, which requires an ICNR tunnel.)
+        #
+        # @return [Boolean]
+        def routable?
+          !!routable
         end
       end
     end

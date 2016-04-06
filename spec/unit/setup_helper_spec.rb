@@ -58,10 +58,14 @@ describe VagrantPlugins::Skytap::SetupHelper do
     end
   end
 
-  let(:vpn)        {API::Vpn.new(vpn_attrs, env)}
-  let(:vpns)       {[vpn]}
-  let(:vpn_choice) {double(:vpn_choice, vpn: vpn, choose: ["1.2.3.4", 22], :valid? => true)}
-  let(:user_input) { "" }
+  let(:vpn)          {API::Vpn.new(vpn_attrs, env)}
+  let(:vpns)         {[vpn]}
+  let(:vpn_choice)   {double(:vpn_choice, vpn: vpn, choose: ["1.2.3.4", 22], :valid? => true)}
+  let(:icnr_choice)  {double(:icnr_choice, choose: ["10.0.0.1", 22], :valid? => icnr_valid, validation_error_message: icnr_err_msg)}
+  let(:icnr_valid)   { true }
+  let(:icnr_err_msg) { nil }
+  let(:user_input)   { "" }
+  let(:running_in_skytap_vm) {false}
 
   let(:ssh_config) do
     double(:ssh_config, username: nil, password: nil, host: nil, port: nil)
@@ -83,6 +87,7 @@ describe VagrantPlugins::Skytap::SetupHelper do
     ENV.stub(:[] => nil)
     allow(ui).to receive(:ask).and_return(user_input)
     allow(instance).to receive(:vpns).and_return(vpns)
+    allow(instance).to receive(:running_in_skytap_vm?).and_return(running_in_skytap_vm)
     allow(vpn).to receive(:choice_for_setup).and_return(vpn_choice)
     stub_request(:get, /.*/).to_return(body: "{}", status: 200)
   end
@@ -110,29 +115,53 @@ describe VagrantPlugins::Skytap::SetupHelper do
       instance.send(:ask_routing)
     end
 
-    context "when valid vpn_url specified" do
-      it {should eq ["1.2.3.4", 22]}
+    before do
+      allow(instance).to receive(:connection_choices).and_return(choices)
     end
 
-    context "when invalid vpn_url specified" do
-      let(:vpn_url) {"bogus"}
-      it "raises error" do
-        expect{subject}.to raise_error Errors::DoesNotExist
+    context "when not running in Skytap VM" do
+      let(:choices) { [vpn_choice] }
+
+      context "when valid vpn_url specified" do
+        it {should eq ["1.2.3.4", 22]}
+      end
+
+      context "when invalid vpn_url specified" do
+        let(:vpn_url) {"bogus"}
+        it "raises error" do
+          expect{subject}.to raise_error Errors::DoesNotExist
+        end
+      end
+
+      context "when vpn_url unspecified" do
+        let(:vpn_url)    {nil}
+        let(:user_input) {"1"}
+        it {should eq ["1.2.3.4", 22]}
+      end
+
+      context "when no valid vpns exist" do
+        before do
+          allow(vpn_choice).to receive(:valid?).and_return(false)
+        end
+        it "raises error" do
+          expect{subject}.to raise_error Errors::NoConnectionOptions
+        end
       end
     end
 
-    context "when vpn_url unspecified" do
-      let(:vpn_url)    {nil}
-      let(:user_input) {"1"}
-      it {should eq ["1.2.3.4", 22]}
-    end
+    context "when running in Skytap VM" do
+      let(:running_in_skytap_vm) {true}
+      let(:choices) { [icnr_choice] }
 
-    context "when no valid vpns exist" do
-      before do
-        allow(vpn_choice).to receive(:valid?).and_return(false)
+      context "when choice is valid" do
+        it {should eq ["10.0.0.1", 22]}
       end
-      it "raises error" do
-        expect{subject}.to raise_error Errors::NoConnectionOptions
+
+      context "when choice is not valid" do
+        let(:icnr_valid)  { false }
+        it "raises error" do
+          expect{subject}.to raise_error Errors::NoSkytapConnectionOptions
+        end
       end
     end
   end

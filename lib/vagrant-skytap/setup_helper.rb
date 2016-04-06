@@ -29,7 +29,7 @@ require 'net/ssh/transport/session'
 module VagrantPlugins
   module Skytap
     class SetupHelper
-      attr_reader :env, :environment, :machine, :provider_config
+      attr_reader :env, :environment, :host_vm, :machine, :provider_config
       attr_reader :username, :password, :host, :port
 
       def self.run!(env, environment)
@@ -40,6 +40,7 @@ module VagrantPlugins
         @env = env
         @logger = Log4r::Logger.new("vagrant_skytap::setup_helper")
         @environment = environment
+        @host_vm = env[:vagrant_host_vm]
         @machine = env[:machine]
         @provider_config = env[:machine].provider_config
         @username = @machine.config.ssh.username
@@ -52,6 +53,10 @@ module VagrantPlugins
         if @environment && @machine
           @environment.get_vms_by_id([@machine.id]).first
         end
+      end
+
+      def running_in_skytap_vm?
+        !!host_vm
       end
 
       def run!
@@ -94,13 +99,20 @@ module VagrantPlugins
       end
 
       def ask_routing
-        @logger.debug("ask_routing")
         unless host && port
           iface = current_vm.interfaces.first
-          choices = connection_choices(iface).select(&:valid?)
+          choices = connection_choices(iface)
+
+          if running_in_skytap_vm?
+            unless choices.any?(&:valid?)
+              raise Errors::NoSkytapConnectionOptions, message: choices.collect(&:validation_error_message).first
+            end
+          end
+
+          choices.select!(&:valid?)
           raise Errors::NoConnectionOptions unless choices.present?
 
-          if vpn_url = @provider_config.vpn_url
+          if !running_in_skytap_vm? && vpn_url = @provider_config.vpn_url
             choice = choices.detect do |choice|
               choice.vpn && vpn_url.include?(choice.vpn.id)
             end
@@ -113,11 +125,16 @@ module VagrantPlugins
             end
           end
         end
+        @logger.debug("ask_routing returning guest VM address and port: #{@host}:#{@port}")
         [@host, @port]
       end
 
       def connection_choices(iface)
-        vpn_choices(iface)
+        if running_in_skytap_vm?
+          tunnel_choices(iface)
+        else
+          vpn_choices(iface)
+        end
       end
 
       def vpn_choices(iface)
@@ -135,6 +152,11 @@ module VagrantPlugins
 
       def published_service_choices(iface)
         iface.published_service_choices
+      end
+
+      def tunnel_choices(guest_iface)
+        candidates = host_vm.interfaces.collect(&:network)
+        candidates.collect {|network| network.choice_for_setup(guest_iface) }
       end
 
       def vpns

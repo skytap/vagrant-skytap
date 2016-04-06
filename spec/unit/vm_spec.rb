@@ -38,7 +38,6 @@ describe VagrantPlugins::Skytap::API::Vm do
   let(:api_client) { API::Client.new(provider_config) }
   let(:machine)    { double(:machine, name: "vm1", id: nil, :id= => nil, provider_config: provider_config) }
   let(:env)        { { machine: machine, api_client: api_client } }
-  let(:instance)   { described_class.new(attrs, env) }
 
   let(:environment) do
     env_attrs = empty_environment_attrs
@@ -46,30 +45,19 @@ describe VagrantPlugins::Skytap::API::Vm do
   end
 
   let(:attrs)    { vm1_attrs }
+  let(:runstate) { nil }
   let(:instance) { described_class.new(attrs, environment, env) }
 
-  # Ensure tests are not affected by Skytap credential environment variables
+  let(:get_vm_attrs) { vm1_attrs }
   before :each do
-    ENV.stub(:[] => nil)
-    stub_request(:get, /.*/).to_return(body: '{}', status: 200)
-    stub_request(:get, %r{/vms/\d+}).to_return(body: JSON.dump(attrs), status: 200)
+    stub_get(%r{/vms/\d+}, get_vm_attrs)
+    allow(instance).to receive(:runstate).and_return(runstate)
   end
 
   describe "reload" do
-    subject do
-      new_attrs = attrs.merge('name' => 'VM1, renamed')
-      client = double('api_client',
-        get: double('resp', body: JSON.dump(new_attrs))
-      )
-      myenv = env.merge(api_client: client)
-      described_class.new(attrs, environment, myenv)
-    end
-
-    it "updates the attrs" do
-      expect(subject.get_api_attribute('name')).to eq 'VM1'
-      subject.reload
-      expect(subject.get_api_attribute('name')).to eq 'VM1, renamed'
-    end
+    subject { instance.reload }
+    let(:get_vm_attrs) {vm1_attrs.merge('name' => 'VM1, renamed')}
+    its("name") {should eq 'VM1, renamed'}
   end
 
   describe "url" do
@@ -80,68 +68,73 @@ describe VagrantPlugins::Skytap::API::Vm do
   end
 
   describe "busy?" do
-    subject do
-      instance
+    subject { instance.busy? }
+
+    context "when stopped" do
+      let(:runstate) {'stopped'}
+      it {should be false}
     end
 
-    it "returns false when stopped" do
-      allow(subject).to receive(:runstate).and_return('stopped')
-      expect(subject.busy?).to eq false
-      allow(subject).to receive(:runstate).and_call_original
+    context "when running" do
+      let(:runstate) {'running'}
+      it {should be false}
     end
 
-    it "returns false when running" do
-      allow(subject).to receive(:runstate).and_return('running')
-      expect(subject.busy?).to eq false
-      allow(subject).to receive(:runstate).and_call_original
-    end
-
-    it "returns true when runstate is busy" do
-      allow(subject).to receive(:runstate).and_return('busy')
-      expect(subject.busy?).to eq true
-      allow(subject).to receive(:runstate).and_call_original
+    context "when busy" do
+      let(:runstate) {'busy'}
+      it {should be true}
     end
   end
 
   describe "running?" do
-    subject do
-      instance
+    subject { instance.running? }
+
+    context "when stopped" do
+      let(:runstate) {'stopped'}
+      it {should be false}
     end
 
-    it "returns false when stopped" do
-      allow(subject).to receive(:runstate).and_return('stopped')
-      expect(subject.running?).to eq false
-      allow(subject).to receive(:runstate).and_call_original
+    context "when suspended" do
+      let(:runstate) {'suspended'}
+      it {should be false}
     end
 
-    it "returns false when suspended" do
-      allow(subject).to receive(:runstate).and_return('suspended')
-      expect(subject.running?).to eq false
-      allow(subject).to receive(:runstate).and_call_original
+    context "when busy" do
+      let(:runstate) {'busy'}
+      it {should be false}
     end
 
-    it "returns false when runstate is busy" do
-      allow(subject).to receive(:runstate).and_return('busy')
-      expect(subject.running?).to eq false
-      allow(subject).to receive(:runstate).and_call_original
+    context "when running" do
+      let(:runstate) {'running'}
+      it {should be true}
+    end
+  end
+
+  describe "parent" do
+    subject {instance.region}
+
+    context "when environment was passed in" do
+      before do
+        expect(a_request(:any, %r{.*})).not_to have_been_made
+      end
+      it { should eq 'US-West'}
     end
 
-    it "returns true when running" do
-      allow(subject).to receive(:runstate).and_return('running')
-      expect(subject.running?).to eq true
-      allow(subject).to receive(:runstate).and_call_original
+    context "when environment was not passed in" do
+      let(:environment) {nil}
+      before do
+        stub_get(%r{/templates/\d+}, {region: 'US-East'})
+      end
+      it { should eq 'US-East'}
     end
   end
 
   describe "region" do
-    subject do
-      fake_template_attrs = {'id' => '5570024', 'region' => 'EMEA'}
-      client = double('api_client',
-        get: double('resp', body: JSON.dump(fake_template_attrs))
-      )
-      myenv = env.merge(api_client: client)
-      described_class.new(attrs, environment, myenv)
+    subject {instance.region}
+
+    before do
+      allow(environment).to receive(:region).and_return('EMEA')
     end
-    its("region") { should == 'EMEA' }
+    it { should eq 'EMEA' }
   end
 end
