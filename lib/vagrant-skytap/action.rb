@@ -152,29 +152,17 @@ module VagrantPlugins
       # This action is called to SSH into the machine.
       def self.action_ssh
         Vagrant::Action::Builder.new.tap do |b|
-          b.use action_fetch_environment
-          b.use Call, ExistenceCheck do |env1, b1|
-            case result = env1[:result]
-            when :missing_environment, :missing_vm, :no_vms
-              b1.use MessageNotCreated
-            else
-              b1.use SSHExec
-            end
-          end
+          b.use CheckCreated
+          b.use CheckRunning
+          b.use SSHExec
         end
       end
 
       def self.action_ssh_run
         Vagrant::Action::Builder.new.tap do |b|
-          b.use action_fetch_environment
-          b.use Call, ExistenceCheck do |env1, b1|
-            case result = env1[:result]
-            when :missing_environment, :missing_vm, :no_vms
-              b1.use MessageNotCreated
-            else
-              b1.use SSHRun
-            end
-          end
+          b.use CheckCreated
+          b.use CheckRunning
+          b.use SSHRun
         end
       end
 
@@ -323,6 +311,8 @@ module VagrantPlugins
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :StoreExtraData, action_root.join("store_extra_data")
       autoload :AddVmToEnvironment, action_root.join("add_vm_to_environment")
+      autoload :CheckCreated, action_root.join("check_created")
+      autoload :CheckRunning, action_root.join("check_running")
       autoload :ClearForwardedPorts, action_root.join("clear_forwarded_ports")
       autoload :ComposeEnvironment, action_root.join("compose_environment")
       autoload :CreateEnvironment, action_root.join("create_environment")
