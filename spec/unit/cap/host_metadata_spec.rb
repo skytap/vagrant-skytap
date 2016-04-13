@@ -20,28 +20,24 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require File.expand_path("../../base", __FILE__)
+require "vagrant-skytap/cap/host_metadata"
 
-module VagrantPlugins
-  module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
+describe VagrantPlugins::Skytap::Cap::HostMetadata do
+  let(:machine) { double("machine") }
 
-        attr_reader :interface
+  before do
+    stub_request(:get, %r{http://gw/skytap}).to_return(body: '', status: 404)
+  end
 
-        reads :id, :internal_port, :external_ip, :external_port
+  describe "host_metadata" do
+    it "returns nil if the metadata is not found" do
+      expect(described_class.host_metadata(machine)).to be nil
+    end
 
-        def self.rest_name
-          "published_service"
-        end
-
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
-        end
-      end
+    it "returns the metadata if found" do
+      stub_request(:get, %r{http://gw/skytap}).to_return(body: '{"id": 1}', status: 200)
+      expect(described_class.host_metadata(machine)).to eq({"id" => 1})
     end
   end
 end

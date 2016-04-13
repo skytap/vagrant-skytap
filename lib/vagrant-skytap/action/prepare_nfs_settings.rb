@@ -20,11 +20,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+require_relative 'action_helpers'
+
 module VagrantPlugins
   module Skytap
     module Action
       class PrepareNFSSettings
-        attr_reader :env, :machine
+        include ActionHelpers
+
+        attr_reader :env, :machine, :host_vm
 
         def initialize(app,env)
           @app = app
@@ -34,6 +38,7 @@ module VagrantPlugins
 
         def call(env)
           @machine = env[:machine]
+          @host_vm = env[:vagrant_host_vm]
 
           if using_nfs?
             env[:nfs_host_ip] = read_host_ip
@@ -59,13 +64,25 @@ module VagrantPlugins
         end
 
         # Returns the IP address of the host, preferring one on an interface
-        # which the client can route to.
+        # which the client can route to. If we're running in a Skytap VM, and
+        # the guest's network is NAT-enabled, the host VM will have been
+        # assigned a NAT address which can be determined from its metadata.
         #
         # @return [String]
         def read_host_ip
-          UDPSocket.open do |s|
-            s.connect(machine.ssh_info[:host], 1)
-            s.addr.last
+          if host_vm
+            host_iface = host_vm.reload.interfaces.first
+            guest_network = current_vm(env).interfaces.first.network
+          end
+
+          if guest_network.try(:nat_enabled?)
+            host_iface.nat_address_for_network(guest_network)
+          else
+            UDPSocket.open do |s|
+              s.connect(machine.ssh_info[:host], 1)
+              @logger.debug("PrepareNFSSettings#read_host_ip found the following addresses #{s.addr}")
+              s.addr.last
+            end
           end.tap do |ret|
             @logger.debug("PrepareNFSSettings#read_host_ip returning #{ret}")
           end

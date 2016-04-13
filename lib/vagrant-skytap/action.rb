@@ -192,6 +192,7 @@ module VagrantPlugins
       # later in the sequence.
       def self.action_prepare_boot
         Vagrant::Action::Builder.new.tap do |b|
+          b.use GetHostVM
           b.use PrepareNFSSettings
           b.use PrepareNFSValidIds
           b.use Provision
@@ -246,6 +247,7 @@ module VagrantPlugins
       def self.action_update_hardware
         Vagrant::Action::Builder.new.tap do |b|
           b.use StoreExtraData
+          b.use GetHostVM
           b.use SetUpVm
           b.use Call, IsStopped do |env, b1|
             if env[:result]
@@ -340,6 +342,7 @@ module VagrantPlugins
       autoload :ExistenceCheck, action_root.join("existence_check")
       autoload :FetchEnvironment, action_root.join("fetch_environment")
       autoload :ForwardPorts, action_root.join("forward_ports")
+      autoload :GetHostVM, action_root.join("get_host_vm")
       autoload :InitializeAPIClient, action_root.join("initialize_api_client")
       autoload :InitialState, action_root.join("initial_state")
       autoload :IsParallelized, action_root.join("is_parallelized")

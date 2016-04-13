@@ -22,23 +22,32 @@
 
 require 'vagrant-skytap/api/resource'
 require 'vagrant-skytap/api/vpn_attachment'
+require 'vagrant-skytap/api/tunnel'
 require 'vagrant-skytap/util/subnet'
+require 'vagrant-skytap/api/connectable'
 
 module VagrantPlugins
   module Skytap
     module API
       class Network < Resource
+        include Connectable
+
         attr_reader :environment
 
-        reads :id, :subnet, :vpn_attachments
+        reads :id, :subnet, :nat_subnet, :vpn_attachments, :name
 
         def initialize(attrs, environment, env)
           super
           @environment = environment
         end
 
+        def url
+          "/configurations/#{environment.id}/networks/#{id}"
+        end
+
         def refresh(attrs)
           @vpn_attachments = nil
+          @tunnels = nil
           super
         end
 
@@ -55,6 +64,56 @@ module VagrantPlugins
         def attachment_for(vpn)
           vpn = vpn.id unless vpn.is_a?(String)
           vpn_attachments.detect {|att| att.vpn['id'] == vpn}
+        end
+
+        # Indicates whether this network is NAT-enabled.
+        #
+        # @return [Boolean]
+        def nat_enabled?
+          nat_subnet.present?
+        end
+
+        # Indicates whether networks in other environments may connect
+        # to this one.
+        #
+        # @return [Boolean]
+        def tunnelable?
+          get_api_attribute('tunnelable')
+        end
+
+        # The set of ICNR tunnels connecting this network to networks in other
+        # environments.
+        #
+        # @returns [Array] of [API::Tunnel]
+        def tunnels
+          @tunnels ||= (get_api_attribute('tunnels') || []).collect do |tunnel_attrs|
+            Tunnel.new(tunnel_attrs, env)
+          end
+        end
+
+        # Connects to a network in another environment via an ICNR tunnel.
+        #
+        # @param [API::Network] other_network The network to connect to.
+        def connect_to_network(other_network)
+          API::Tunnel.create!(env, self, other_network)
+          updated_network = environment.reload.networks.find{|n| n.id == id}
+          refresh(updated_network.attrs)
+        end
+
+        # Indicates whether an ICNR tunnel exists between this network and the
+        # given network in another environment. (For networks within the same
+        # environment, check the environment's #routable? flag instead.)
+        #
+        # @return [Boolean]
+        def connected_to_network?(other_network)
+          tunnels.any? do |tunnel|
+            tunnel.target_network.id == other_network.id || tunnel.source_network.id == other_network.id
+          end
+        end
+
+        def connection_choice_class
+          require "vagrant-skytap/connection/tunnel_choice"
+          Class.const_get("VagrantPlugins::Skytap::Connection::TunnelChoice")
         end
       end
     end

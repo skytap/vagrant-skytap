@@ -22,6 +22,8 @@
 
 require_relative 'specified_attributes'
 
+# Base class for all resources accessible through the REST API.
+
 module VagrantPlugins
   module Skytap
     module API
@@ -31,8 +33,12 @@ module VagrantPlugins
         attr_reader :attrs, :env
 
         class << self
-          def resource_name
-            name.split("::").last
+          # Resource name suitable for use in URLs. This should be overridden
+          # for classes with camel-cased names (e.g., VpnAttachment).
+          #
+          # @return [String]
+          def rest_name
+            name.split("::").last.downcase
           end
         end
 
@@ -41,15 +47,27 @@ module VagrantPlugins
           @env = args.last
         end
 
+        # The URL for this specific instance. This method should be overridden
+        # for more complex routes such as Rails nested resources.
+        #
+        # @return [String]
         def url
-          "/#{self.class.resource_name.downcase}s/#{id}"
+          "/#{self.class.rest_name}s/#{id}"
         end
 
+        # Re-fetch the object from the API and update attributes.
+        #
+        # @return [API::Resource]
         def reload
           resp = api_client.get(url)
           refresh(JSON.load(resp.body))
         end
 
+        # Replace the object's attributes hash. Subclasses may override this
+        # method to perform additional operations such as discarding cached child
+        # collections.
+        #
+        # @return [API::Resource]
         def refresh(attrs)
           @attrs = attrs
           self
@@ -57,6 +75,10 @@ module VagrantPlugins
 
         private
 
+        # Return a reference to the API client which was passed in when
+        # the object was created.
+        #
+        # @return [API::Client]
         def api_client
           env[:api_client]
         end

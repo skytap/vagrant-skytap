@@ -20,26 +20,31 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require "vagrant-skytap/api/vm"
 
 module VagrantPlugins
   module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
-
-        attr_reader :interface
-
-        reads :id, :internal_port, :external_ip, :external_port
-
-        def self.rest_name
-          "published_service"
+    module Action
+      # If Vagrant is running in a Skytap VM, retrieve the VM's metadata,
+      # instantiate the VM, and store the result in env[:vagrant_host_vm].
+      # The request does not go through the REST API, so it can be made
+      # without an api token.
+      class GetHostVM
+        def initialize(app, env)
+          @app = app
+          @logger = Log4r::Logger.new("vagrant_skytap::action::get_host_metadata")
         end
 
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
+        def call(env)
+          unless env[:vagrant_host_vm]
+            if metadata = env[:machine].provider.capability(:host_metadata)
+              # The environment will be lazy loaded
+              env[:vagrant_host_vm] = vm = API::Vm.new(metadata, nil, env)
+              @logger.info("Running Vagrant in a Skytap VM. ID: #{vm.try(:id)}")
+            end
+          end
+
+          @app.call(env)
         end
       end
     end
