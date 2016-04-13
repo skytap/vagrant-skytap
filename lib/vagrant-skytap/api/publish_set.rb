@@ -30,6 +30,10 @@ module VagrantPlugins
         attr_reader :environment
         reads :id, :url, :desktops_url
 
+        def self.rest_name
+          "publish_set"
+        end
+
         def initialize(attrs, environment, env)
           super
           @environment = environment

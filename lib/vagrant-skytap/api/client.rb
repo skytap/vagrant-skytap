@@ -21,6 +21,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 require 'base64'
+require "vagrant-skytap/version"
 
 module VagrantPlugins
   module Skytap
@@ -129,12 +130,16 @@ module VagrantPlugins
 
         private
 
+        def user_agent_string
+          "Vagrant-Skytap/#{VagrantPlugins::Skytap::VERSION} Vagrant/#{Vagrant::VERSION}"
+        end
 
         def default_headers
           {
             'Authorization' => auth_header,
             'Content-Type' => 'application/json',
-            'Accept' => 'application/json'
+            'Accept' => 'application/json',
+            'User-Agent' => user_agent_string,
           }
         end
 

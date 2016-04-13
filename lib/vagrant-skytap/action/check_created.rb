@@ -20,26 +20,22 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
-
 module VagrantPlugins
   module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
-
-        attr_reader :interface
-
-        reads :id, :internal_port, :external_ip, :external_port
-
-        def self.rest_name
-          "published_service"
+    module Action
+      # This middleware checks that the VM is created, and raises an exception
+      # if it is not, notifying the user that creation is required.
+      class CheckCreated
+        def initialize(app, env)
+          @app = app
         end
 
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
+        def call(env)
+          if env[:machine].state.id == :not_created
+            raise Vagrant::Errors::VMNotCreatedError
+          end
+
+          @app.call(env)
         end
       end
     end

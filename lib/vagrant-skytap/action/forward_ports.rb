@@ -51,7 +51,7 @@ module VagrantPlugins
           @env[:forwarded_ports].each do |fp|
             unless fp.internal_ssh_port?
               @env[:ui].detail(I18n.t("vagrant.actions.vm.forward_ports.forwarding_entry",
-                                        adapter: fp.adapter,
+                                        adapter: "--",
                                         guest_port: fp.guest_port,
                                         host_port: fp.host_port))
               @env[:host].capability(:start_ssh_tunnel, fp, @env[:machine])

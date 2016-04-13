@@ -20,28 +20,34 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require_relative 'base'
 
-module VagrantPlugins
-  module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
+describe VagrantPlugins::Skytap::API::Interface do
+  include_context "rest_api"
 
-        attr_reader :interface
+  let(:json_path)       { File.join(File.expand_path('..', __FILE__), 'support', 'api_responses') }
+  let(:vm1_attrs)       { read_json(json_path, 'vm1.json') }
+  let(:interface_attrs) { vm1_attrs['interfaces'].first }
 
-        reads :id, :internal_port, :external_ip, :external_port
+  let(:env)             { {} }
+  let(:network)         { double(:network, id: "2") }
+  let(:vm)              { nil }
 
-        def self.rest_name
-          "published_service"
-        end
+  let(:attrs)       { interface_attrs }
+  let(:instance)    { described_class.new(attrs, vm, env) }
 
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
-        end
+  describe "nat_address_for_network" do
+    subject { instance.nat_address_for_network(network) }
+
+    context "when subject has a nat address from the network" do
+      it { should eq "10.0.4.1" }
+    end
+
+    context "when subject has a nat address from a different network" do
+      before do
+        allow(network).to receive(:id).and_return("3")
       end
+      it { should be nil }
     end
   end
 end

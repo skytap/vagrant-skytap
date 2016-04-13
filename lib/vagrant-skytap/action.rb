@@ -38,7 +38,20 @@ module VagrantPlugins
               b1.use MessageNotCreated
             else
               b1.use ClearForwardedPorts
-              b1.use StopVm
+              # May not halt suspended machines without --force flag
+              b1.use Call, IsSuspended do |env2, b2|
+                if env2[:result]
+                  b2.use Call, IsEnvSet, :force_halt do |env3, b3|
+                    if env3[:result]
+                      b3.use StopVm
+                    else
+                      b3.use Message, I18n.t("vagrant_skytap.commands.halt.not_allowed_if_suspended")
+                    end
+                  end
+                else
+                  b2.use StopVm
+                end
+              end
             end
           end
         end
@@ -53,8 +66,14 @@ module VagrantPlugins
             when :missing_environment, :missing_vm, :no_vms
               b1.use MessageNotCreated
             else
-              b1.use ClearForwardedPorts
-              b1.use SuspendVm
+              b1.use Call, IsRunning do |env2, b2|
+                if env2[:result]
+                  b2.use ClearForwardedPorts
+                  b2.use SuspendVm
+                else
+                  b2.use Message, I18n.t("vagrant_skytap.commands.suspend.only_allowed_if_running")
+                end
+              end
             end
           end
         end
@@ -152,29 +171,17 @@ module VagrantPlugins
       # This action is called to SSH into the machine.
       def self.action_ssh
         Vagrant::Action::Builder.new.tap do |b|
-          b.use action_fetch_environment
-          b.use Call, ExistenceCheck do |env1, b1|
-            case result = env1[:result]
-            when :missing_environment, :missing_vm, :no_vms
-              b1.use MessageNotCreated
-            else
-              b1.use SSHExec
-            end
-          end
+          b.use CheckCreated
+          b.use CheckRunning
+          b.use SSHExec
         end
       end
 
       def self.action_ssh_run
         Vagrant::Action::Builder.new.tap do |b|
-          b.use action_fetch_environment
-          b.use Call, ExistenceCheck do |env1, b1|
-            case result = env1[:result]
-            when :missing_environment, :missing_vm, :no_vms
-              b1.use MessageNotCreated
-            else
-              b1.use SSHRun
-            end
-          end
+          b.use CheckCreated
+          b.use CheckRunning
+          b.use SSHRun
         end
       end
 
@@ -185,6 +192,7 @@ module VagrantPlugins
       # later in the sequence.
       def self.action_prepare_boot
         Vagrant::Action::Builder.new.tap do |b|
+          b.use GetHostVM
           b.use PrepareNFSSettings
           b.use PrepareNFSValidIds
           b.use Provision
@@ -239,6 +247,7 @@ module VagrantPlugins
       def self.action_update_hardware
         Vagrant::Action::Builder.new.tap do |b|
           b.use StoreExtraData
+          b.use GetHostVM
           b.use SetUpVm
           b.use Call, IsStopped do |env, b1|
             if env[:result]
@@ -323,6 +332,8 @@ module VagrantPlugins
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :StoreExtraData, action_root.join("store_extra_data")
       autoload :AddVmToEnvironment, action_root.join("add_vm_to_environment")
+      autoload :CheckCreated, action_root.join("check_created")
+      autoload :CheckRunning, action_root.join("check_running")
       autoload :ClearForwardedPorts, action_root.join("clear_forwarded_ports")
       autoload :ComposeEnvironment, action_root.join("compose_environment")
       autoload :CreateEnvironment, action_root.join("create_environment")
@@ -331,6 +342,7 @@ module VagrantPlugins
       autoload :ExistenceCheck, action_root.join("existence_check")
       autoload :FetchEnvironment, action_root.join("fetch_environment")
       autoload :ForwardPorts, action_root.join("forward_ports")
+      autoload :GetHostVM, action_root.join("get_host_vm")
       autoload :InitializeAPIClient, action_root.join("initialize_api_client")
       autoload :InitialState, action_root.join("initial_state")
       autoload :IsParallelized, action_root.join("is_parallelized")

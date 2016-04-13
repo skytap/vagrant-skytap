@@ -20,26 +20,24 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require "socket"
+require "net/http"
 
 module VagrantPlugins
   module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
+    module Cap
+      module HostMetadata
 
-        attr_reader :interface
-
-        reads :id, :internal_port, :external_ip, :external_port
-
-        def self.rest_name
-          "published_service"
-        end
-
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
+        # Attempt to retrieve information about the Vagrant host
+        # from the metadata service. If found, we're running in a
+        # Skytap VM.
+        def self.host_metadata(machine)
+          begin
+            http = Net::HTTP.new("gw", 80)
+            response = http.request(Net::HTTP::Get.new("/skytap"))
+            JSON.parse(response.body) if response.is_a?(Net::HTTPOK)
+          rescue SocketError, Net::HTTPNotFound => ex
+          end
         end
       end
     end

@@ -20,28 +20,25 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
+require_relative 'base'
+require "vagrant-skytap/api/client"
 
-module VagrantPlugins
-  module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
+describe VagrantPlugins::Skytap::API::Client do
+  include_context "rest_api"
 
-        attr_reader :interface
+  let(:provider_config) do
+    double(:provider_config, vm_url: "/vms/1", username: "jsmith", api_token: "123123", base_url: base_url)
+  end
+  let(:instance)   { described_class.new(provider_config) }
 
-        reads :id, :internal_port, :external_ip, :external_port
+  before :each do
+    stub_request(:get, /.*/).to_return(body: "{}", status: 200)
+  end
 
-        def self.rest_name
-          "published_service"
-        end
-
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
-        end
-      end
+  describe "user_agent_string" do
+    subject do
+      instance.send(:user_agent_string)
     end
+    it {should match %r{^Vagrant-Skytap/.* Vagrant/.*}}
   end
 end

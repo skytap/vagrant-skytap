@@ -71,6 +71,11 @@ module VagrantPlugins
         Cap::PublicAddress
       end
 
+      provider_capability(:skytap, :host_metadata) do
+        require_relative "cap/host_metadata"
+        Cap::HostMetadata
+      end
+
       %w[start_ssh_tunnel kill_ssh_tunnel clear_forwarded_ports read_forwarded_ports read_used_ports].each do |cap|
         host_capability("bsd", cap) do
           require_relative "hosts/bsd/cap/ssh_tunnel"

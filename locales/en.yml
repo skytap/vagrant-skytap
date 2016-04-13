@@ -100,6 +100,11 @@ en:
         There were no available options for connecting to the VM.
         Currently, the provider supports connections over VPN only.
 
+      no_skytap_connection_options: |-
+        Could not establish a connection between the host and guest VMs.
+        %{message}
+        Please correct the problem and try again.
+
       bad_vm_url: |-
         The specified vm_url was invalid: %{url}
 
@@ -143,6 +148,47 @@ en:
       long_busy: |-
         The Skytap instance is busy. Wait for the current operation to complete.
 
+    connections:
+      vpn_attachment:
+        verb_use: |-
+          Use VPN
+        verb_connect: |-
+          Connect to and use VPN
+        verb_attach: |-
+          Attach to and use VPN
+        nat_enabled: |-
+          (NAT-enabled)
+        local_subnet: |-
+          (local subnet: %{local_subnet})
+      published_service:
+        verb_use: |-
+          Use published service
+        verb_create_and_use: |-
+          Create and use published service
+      public_ip:
+        verb_use: |-
+          Use public IP
+        verb_attach: |-
+          Attach and use public IP
+        deployed: |-
+          (attached and deployed to another VM)
+        attached: |-
+          (attached to another VM)
+      tunnel:
+        verb_use: |-
+          Use existing tunnel to host network
+        verb_create_and_use: |-
+          Create and use tunnel to host network
+        errors:
+          host_network_not_tunnelable: |-
+            The host's network must be tunnelable.
+          host_network_nat_disabled: |-
+            The host's network must have NAT enabled.
+          guest_network_overlaps: |-
+            The guest's network subnet overlaps with the host's network.
+            (This can be resolved by changing network subnets, or by
+            enabling NAT on the guest network.)
+
     commands:
       publish_urls:
         list: |-
@@ -171,4 +217,16 @@ en:
           created through the Skytap UI) have been deleted. Users cannot
           manage these VMs, or access them through SmartClient, unless they
           have a Skytap user account with appropriate permissions.
-
+      halt:
+        not_allowed_if_suspended: |-
+          Suspended machines cannot be halted gracefully. Run `vagrant up`
+          or `vagrant resume` to run the machine before halting. Alternately,
+          you may power off the machine with `vagrant halt --force`, but
+          data corruption may occur.
+      suspend:
+        only_allowed_if_running: |-
+          Only running machines may be suspended. Run `vagrant up` before
+          suspending this machine.
+      resume:
+        only_allowed_if_suspended: |-
+          Only suspended machines may be resumed.

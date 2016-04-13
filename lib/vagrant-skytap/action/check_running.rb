@@ -20,26 +20,22 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-require 'vagrant-skytap/api/resource'
-require 'vagrant-skytap/api/connectable'
-
 module VagrantPlugins
   module Skytap
-    module API
-      class PublishedService < Resource
-        include Connectable
-
-        attr_reader :interface
-
-        reads :id, :internal_port, :external_ip, :external_port
-
-        def self.rest_name
-          "published_service"
+    module Action
+      # This middleware checks that the VM is running, and raises an exception
+      # if it is not, notifying the user that the VM must be running.
+      class CheckRunning
+        def initialize(app, env)
+          @app = app
         end
 
-        def initialize(attrs, interface, env)
-          super
-          @interface = interface
+        def call(env)
+          if env[:machine].state.id != :running
+            raise Vagrant::Errors::VMNotRunningError
+          end
+
+          @app.call(env)
         end
       end
     end

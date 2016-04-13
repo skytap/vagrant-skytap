@@ -89,6 +89,10 @@ module VagrantPlugins
         error_key(:no_connection_options)
       end
 
+      class NoSkytapConnectionOptions < VagrantSkytapError
+        error_key(:no_skytap_connection_options)
+      end
+
       class FeatureNotSupportedForHostOs < VagrantSkytapError
         error_key(:feature_not_supported_for_host_os)
       end
