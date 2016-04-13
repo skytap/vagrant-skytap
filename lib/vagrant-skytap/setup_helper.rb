@@ -112,18 +112,22 @@ module VagrantPlugins
           choices.select!(&:valid?)
           raise Errors::NoConnectionOptions unless choices.present?
 
+          choice = nil
           if !running_in_skytap_vm? && vpn_url = @provider_config.vpn_url
             choice = choices.detect do |choice|
               choice.vpn && vpn_url.include?(choice.vpn.id)
             end
             raise Errors::DoesNotExist, object_name: vpn_url unless choice
-            @host, @port = choice.choose
+          elsif choices.count == 1
+            choice = choices.first
+            env[:ui].info("Using only available connection option: #{choice}")
           else
             question = "How do you want to connect to machine '#{@machine.name}'?"
-            ask_from_list(question, choices, 0) do |i, choice|
-              @host, @port = choice.choose
+            ask_from_list(question, choices, 0) do |i, _choice|
+              choice = _choice
             end
           end
+          @host, @port = choice.choose
         end
         @logger.debug("ask_routing returning guest VM address and port: #{@host}:#{@port}")
         [@host, @port]

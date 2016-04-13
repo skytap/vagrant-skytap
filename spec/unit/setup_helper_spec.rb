@@ -58,13 +58,14 @@ describe VagrantPlugins::Skytap::SetupHelper do
     end
   end
 
-  let(:vpn)          {API::Vpn.new(vpn_attrs, env)}
-  let(:vpns)         {[vpn]}
-  let(:vpn_choice)   {double(:vpn_choice, vpn: vpn, choose: ["1.2.3.4", 22], :valid? => true)}
-  let(:icnr_choice)  {double(:icnr_choice, choose: ["10.0.0.1", 22], :valid? => icnr_valid, validation_error_message: icnr_err_msg)}
-  let(:icnr_valid)   { true }
-  let(:icnr_err_msg) { nil }
-  let(:user_input)   { "" }
+  let(:vpn)                  {API::Vpn.new(vpn_attrs, env)}
+  let(:vpns)                 {[vpn]}
+  let(:vpn_choice)           {double(:vpn_choice, vpn: vpn, choose: ["1.2.3.4", 22], :valid? => true)}
+  let(:vpn_choice2)          {double(:vpn_choice2, vpn: nil, choose: ["5.6.7.8", 22], :valid? => true)}
+  let(:icnr_choice)          {double(:icnr_choice, choose: ["10.0.0.1", 22], :valid? => icnr_valid, validation_error_message: icnr_err_msg)}
+  let(:icnr_valid)           { true }
+  let(:icnr_err_msg)         { nil }
+  let(:user_input)           { "" }
   let(:running_in_skytap_vm) {false}
 
   let(:ssh_config) do
@@ -115,52 +116,62 @@ describe VagrantPlugins::Skytap::SetupHelper do
       instance.send(:ask_routing)
     end
 
+    let(:connection_choices) {[vpn_choice, vpn_choice2]}
+    let(:asks_user) {false}
+
     before do
-      allow(instance).to receive(:connection_choices).and_return(choices)
+      allow(instance).to receive(:connection_choices).and_return(connection_choices)
+      if asks_user
+        expect(ui).to receive(:ask)
+      else
+        expect(ui).to_not receive(:ask)
+      end
     end
 
-    context "when not running in Skytap VM" do
-      let(:choices) { [vpn_choice] }
+    context "when no valid choices are available" do
+      let(:connection_choices) {[]}
+      it "should raise NoConnectionOptions" do
+        expect{subject}.to raise_error Errors::NoConnectionOptions
+      end
+    end
 
-      context "when valid vpn_url specified" do
-        it {should eq ["1.2.3.4", 22]}
+    context "when a single valid choice is available" do
+      let(:connection_choices) {[vpn_choice]}
+      it "should pick the only available choice automatically" do
+        expect(subject).to eq connection_choices.first.choose
+      end
+    end
+
+    context "when vpn_url specified" do
+      context "when vpn is an available choice" do
+        it "should use the specified vpn" do
+          expect(subject).to eq vpn_choice.choose
+        end
       end
 
-      context "when invalid vpn_url specified" do
-        let(:vpn_url) {"bogus"}
-        it "raises error" do
+      context "when vpn is not an available choice" do
+        let(:vpn_url) {"/vpns/999"}
+        it "should raise DoesNotExist" do
           expect{subject}.to raise_error Errors::DoesNotExist
         end
       end
 
-      context "when vpn_url unspecified" do
-        let(:vpn_url)    {nil}
-        let(:user_input) {"1"}
-        it {should eq ["1.2.3.4", 22]}
-      end
-
-      context "when no valid vpns exist" do
-        before do
-          allow(vpn_choice).to receive(:valid?).and_return(false)
-        end
-        it "raises error" do
-          expect{subject}.to raise_error Errors::NoConnectionOptions
+      context "when running in skytap vm" do
+        let(:running_in_skytap_vm) {true}
+        let(:connection_choices) {[icnr_choice]}
+        it "should ignore the vpn_url" do
+          expect(subject).to eq icnr_choice.choose
         end
       end
     end
 
-    context "when running in Skytap VM" do
-      let(:running_in_skytap_vm) {true}
-      let(:choices) { [icnr_choice] }
-
-      context "when choice is valid" do
-        it {should eq ["10.0.0.1", 22]}
-      end
-
-      context "when choice is not valid" do
-        let(:icnr_valid)  { false }
-        it "raises error" do
-          expect{subject}.to raise_error Errors::NoSkytapConnectionOptions
+    context "when vpn_url is not specified" do
+      let(:vpn_url) {nil}
+      context "when multiple valid choices are available" do
+        let(:user_input) {"2"}
+        let(:asks_user) {true}
+        it "should pick the one chosen by the user" do
+          expect(subject).to eq vpn_choice2.choose
         end
       end
     end
