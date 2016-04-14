@@ -22,6 +22,6 @@
 
 module VagrantPlugins
   module Skytap
-    VERSION = "0.2.10"
+    VERSION = "0.3.0"
   end
 end

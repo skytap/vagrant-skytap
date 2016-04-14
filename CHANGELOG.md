@@ -1,3 +1,10 @@
+# 0.3.0 (April 13, 2016)
+
+* New functionality to support running Vagrant from within a Skytap VM. The connection between host and
+  guest will be made over a network tunnel between the two Skytap environments.
+* `vagrant ssh` now shows the expected error when the machine is not running.
+* Support unattended `vagrant up` by automatically choosing the only available connection option.  
+
 # 0.2.10 (March 17, 2016)
 
 * Fix bug in port forwarding messaging.
