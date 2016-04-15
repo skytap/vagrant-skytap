@@ -1,6 +1,7 @@
 # 0.3.1 (April 15, 2016)
 
 * Add support for running in a Skytap VM when the VM's network is using a custom DNS.
+* Clean up SSH tunnels on `vagrant destroy` (port forwarding bug).
 
 # 0.3.0 (April 13, 2016)
 
