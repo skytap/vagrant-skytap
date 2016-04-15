@@ -1,0 +1,3 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "skytap/ubuntu-1204-x64-us-west"
+end

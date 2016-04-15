@@ -100,6 +100,10 @@ module VagrantPlugins
       class VmParentMismatch < VagrantSkytapError
         error_key(:vm_parent_mismatch)
       end
+
+      class MetadataServiceUnavailable < VagrantSkytapError
+        error_key(:metadata_service_unavailable)
+      end
     end
   end
 end
