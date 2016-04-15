@@ -1,3 +1,7 @@
+# 0.3.1 (April 15, 2016)
+
+* Add support for running in a Skytap VM when the VM's network is using a custom DNS.
+
 # 0.3.0 (April 13, 2016)
 
 * New functionality to support running Vagrant from within a Skytap VM. The connection between host and
