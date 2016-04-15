@@ -121,6 +121,10 @@ en:
       feature_not_supported_for_host_os: |-
         The %{feature_name} feature is currently not supported for your host operating system.
 
+      metadata_service_unavailable: |-
+        You appear to be running Vagrant in a Skytap VM. There was an error retrieving
+        information about this VM. Please retry later.
+
     states:
       short_not_created: |-
         not created
