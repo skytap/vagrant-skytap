@@ -97,6 +97,7 @@ module VagrantPlugins
             end
             b1.use Call, DestroyConfirm do |env2, b2|
               if env2[:result]
+                b2.use ClearForwardedPorts
                 case existence_state
                 when :one_of_many_vms
                   b2.use DeleteVm
@@ -109,7 +110,6 @@ module VagrantPlugins
               end
             end
           end
-          b.use ClearForwardedPorts
           b.use PrepareNFSValidIds
           b.use SyncedFolderCleanup
         end
