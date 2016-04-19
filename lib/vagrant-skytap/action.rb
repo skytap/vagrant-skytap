@@ -96,6 +96,7 @@ module VagrantPlugins
               next
             end
             b1.use Call, DestroyConfirm do |env2, b2|
+              b2.use ClearForwardedPorts
               if env2[:result]
                 b2.use ClearForwardedPorts
                 case existence_state
