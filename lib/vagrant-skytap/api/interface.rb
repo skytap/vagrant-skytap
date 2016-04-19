@@ -23,14 +23,11 @@
 require 'vagrant-skytap/api/resource'
 require 'vagrant-skytap/api/public_ip'
 require 'vagrant-skytap/api/published_service'
-require_relative 'busyable'
 
 module VagrantPlugins
   module Skytap
     module API
       class Interface < Resource
-        include Busyable
-
         attr_reader :vm
 
         reads :id, :ip, :nat_addresses, :network_id, :public_ips, :services

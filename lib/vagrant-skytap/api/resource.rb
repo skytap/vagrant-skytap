@@ -33,12 +33,19 @@ module VagrantPlugins
         attr_reader :attrs, :env
 
         class << self
+          # Last segment of the class name (without the namespace).
+          #
+          # @return [String]
+          def short_name
+            name.split("::").last
+          end
+
           # Resource name suitable for use in URLs. This should be overridden
           # for classes with camel-cased names (e.g., VpnAttachment).
           #
           # @return [String]
           def rest_name
-            name.split("::").last.downcase
+            short_name.downcase
           end
         end
 
@@ -71,6 +78,25 @@ module VagrantPlugins
         def refresh(attrs)
           @attrs = attrs
           self
+        end
+
+        # Sets attributes on the Skytap model, then refreshes this resource
+        # from the response.
+        #
+        # @param [Hash] attrs The attributes to update on the resource.
+        # @param [String] path The path to this resource, if different from
+        #   the default.
+        # @return [API::Resource]
+        def update(attrs, path=nil)
+          resp = api_client.put(path || url, JSON.dump(attrs))
+          refresh(JSON.load(resp.body))
+        end
+
+        # Remove this resource from Skytap.
+        #
+        # @return [NilClass]
+        def delete
+          api_client.delete(url)
         end
 
         private

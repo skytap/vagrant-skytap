@@ -105,17 +105,6 @@ module VagrantPlugins
         def region
           @region ||= parent.region
         end
-
-        def delete
-          begin
-            retry_while_resource_busy do
-              api_client.delete(url)
-              break
-            end
-          rescue Errors::OperationFailed => ex
-            raise Errors::OperationFailed, err: 'Failed to delete VM'
-          end
-        end
       end
     end
   end

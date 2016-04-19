@@ -50,7 +50,7 @@ module VagrantPlugins
 
             if hardware_info.present?
               @logger.info("Updating hardware properties: #{hardware_info}")
-              vm.update_with_retry(hardware: hardware_info)
+              vm.update(hardware: hardware_info)
             end
           end
 
