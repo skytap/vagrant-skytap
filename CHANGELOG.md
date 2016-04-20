@@ -1,3 +1,7 @@
+# 0.3.2 (April 19, 2016)
+
+* Retry all operations on 423 response (previously this was not happening when attaching to a VPN).
+
 # 0.3.1 (April 15, 2016)
 
 * Add support for running in a Skytap VM when the VM's network is using a custom DNS.
