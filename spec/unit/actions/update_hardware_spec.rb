@@ -39,7 +39,7 @@ describe VagrantPlugins::Skytap::Action::UpdateHardware do
   describe "#call" do
     it "filters out unchanged hardware properties" do
       allow(subject).to receive(:current_vm).and_return(vm)
-      expect(vm).to receive(:update_with_retry).with(hardware: {cpus: 4, cpus_per_socket: 2, guestOS: "linux"})
+      expect(vm).to receive(:update).with(hardware: {cpus: 4, cpus_per_socket: 2, guestOS: "linux"})
       subject.call(env)
     end
   end

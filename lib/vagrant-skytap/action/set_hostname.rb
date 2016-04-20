@@ -42,7 +42,7 @@ module VagrantPlugins
               if nic = vm.interfaces.first
                 if hostname != nic.get_api_attribute('hostname')
                   @logger.info("Updating hostname: #{hostname}")
-                  nic.update_with_retry(hostname: hostname)
+                  nic.update(hostname: hostname)
                 end
               end
             end

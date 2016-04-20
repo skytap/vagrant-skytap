@@ -144,13 +144,6 @@ module VagrantPlugins
           set_runstate :running, vm_ids: vm_ids
         end
 
-        def delete
-          retry_while_resource_busy do
-            api_client.delete(url)
-            break
-          end
-        end
-
         # Makes the REST call to add VMs to this environment, using
         # the provided VMs as sources.
         #
@@ -169,7 +162,7 @@ module VagrantPlugins
           end
 
           existing_vm_ids = self.vms.collect(&:id)
-          update_with_retry(args)
+          update(args)
           get_vms_by_id(self.vms.collect(&:id) - existing_vm_ids)
         end
 

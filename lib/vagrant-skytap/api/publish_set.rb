@@ -52,10 +52,6 @@ module VagrantPlugins
         def vms
           environment.get_vms_by_id(vm_ids)
         end
-
-        def delete
-          api_client.delete(url)
-        end
       end
     end
   end

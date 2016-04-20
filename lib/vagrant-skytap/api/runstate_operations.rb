@@ -21,13 +21,12 @@
 # DEALINGS IN THE SOFTWARE.
 
 require 'timeout'
-require_relative 'busyable'
 
 module VagrantPlugins
   module Skytap
     module API
       module RunstateOperations
-        include Busyable
+        RUNSTATE_RETRY = 5
 
         def run!
           set_runstate :running
@@ -51,7 +50,7 @@ module VagrantPlugins
           params = {runstate: new_runstate}.tap do |ret|
             ret[:multiselect] = opts[:vm_ids] if opts[:vm_ids]
           end
-          update_with_retry(params)
+          update(params)
 
           wait_for_runstate(completed_runstate) unless runstate == completed_runstate
         end
@@ -62,10 +61,17 @@ module VagrantPlugins
 
         def wait_for_runstate(expected_runstate)
           expected_runstate = expected_runstate.to_s
-          retry_while_resource_busy do
-            unless reload.busy?
-              break if runstate == expected_runstate || expected_runstate == 'ready'
+          begin
+            Timeout.timeout(provider_config.instance_ready_timeout) do
+              loop do
+                unless reload.busy?
+                  break if runstate == expected_runstate || expected_runstate == 'ready'
+                end
+                sleep RUNSTATE_RETRY
+              end
             end
+          rescue Timeout::Error => ex
+            raise Errors::InstanceReadyTimeout, timeout: provider_config.instance_ready_timeout
           end
         end
 

@@ -21,14 +21,11 @@
 # DEALINGS IN THE SOFTWARE.
 
 require 'vagrant-skytap/api/resource'
-require_relative 'busyable'
 
 module VagrantPlugins
   module Skytap
     module API
       class VpnAttachment < Resource
-        include Busyable
-
         attr_reader :network
 
         reads :connected, :network, :vpn
@@ -65,7 +62,7 @@ module VagrantPlugins
         end
 
         def connect!
-          update_with_retry(connected: true)
+          update(connected: true)
           raise Errors::VpnConnectionFailed unless connected?
         end
 

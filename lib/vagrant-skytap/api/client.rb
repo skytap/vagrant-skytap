@@ -22,6 +22,7 @@
 
 require 'base64'
 require "vagrant-skytap/version"
+require 'timeout'
 
 module VagrantPlugins
   module Skytap
@@ -29,8 +30,9 @@ module VagrantPlugins
       class Client
         attr_reader :config, :http
 
+        DEFAULT_TIMEOUT = 120
         MAX_RATE_LIMIT_RETRIES = 3
-        DEFAULT_RETRY_AFTER_SECONDS = 10
+        DEFAULT_RETRY_AFTER_SECONDS = 5
 
         def initialize(config)
           @logger = Log4r::Logger.new("vagrant_skytap::api_client")
@@ -83,35 +85,47 @@ module VagrantPlugins
           end
 
           headers = default_headers.merge(options[:extra_headers] || {})
-          tries = 0
           retry_after = DEFAULT_RETRY_AFTER_SECONDS
+          most_recent_exception = nil
+
           begin
-            tries += 1
-            http.send_request(method, URI.encode(path), body, headers).tap do |ret|
-              @logger.debug("REST API response: #{ret.body}")
-              unless ret.code =~ /^2\d\d/
-                raise Errors::DoesNotExist, object_name: "Object '#{path}'" if ret.code == '404'
-                error_class = case ret.code
-                when '403'
-                  Errors::Unauthorized
-                when '422'
-                  Errors::UnprocessableEntity
-                when '423'
-                  Errors::ResourceBusy
-                when '429'
-                  retry_after = ret['Retry-After'] || DEFAULT_RETRY_AFTER_SECONDS
-                  Errors::RateLimited
-                else
-                  Errors::OperationFailed
+            Timeout.timeout(options[:timeout] || DEFAULT_TIMEOUT) do
+              begin
+                http.send_request(method, URI.encode(path), body, headers).tap do |ret|
+                  @logger.debug("REST API response: #{ret.body}")
+                  unless ret.code =~ /^2\d\d/
+                    raise Errors::DoesNotExist, object_name: "Object '#{path}'" if ret.code == '404'
+                    error_class = case ret.code
+                    when '403'
+                      Errors::Unauthorized
+                    when '422'
+                      Errors::UnprocessableEntity
+                    when '423'
+                      Errors::ResourceBusy
+                    when '429'
+                      retry_after = ret['Retry-After'] || DEFAULT_RETRY_AFTER_SECONDS
+                      Errors::RateLimited
+                    else
+                      Errors::OperationFailed
+                    end
+                    raise error_class, err: error_string_from_body(ret)
+                  end
                 end
-                raise error_class, err: error_string_from_body(ret)
+              rescue Errors::RateLimited => ex
+                most_recent_exception = ex
+                @logger.info("Rate limited, wil retry in #{retry_after} seconds")
+                sleep retry_after.to_f + 0.1
+                retry
+              rescue Errors::ResourceBusy => ex
+                most_recent_exception = ex
+                @logger.debug("Resource busy, retrying")
+                sleep DEFAULT_RETRY_AFTER_SECONDS
+                retry
               end
             end
-          rescue Errors::RateLimited => ex
-            raise if tries > MAX_RATE_LIMIT_RETRIES
-            @logger.info("Rate limited, wil retry in #{retry_after} seconds")
-            sleep retry_after.to_f + 0.1
-            retry
+          rescue Timeout::Error => ex
+            raise most_recent_exception if most_recent_exception
+            raise Errors::OperationFailed, "Timeout exceeded"
           end
         end
 
