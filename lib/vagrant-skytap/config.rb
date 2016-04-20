@@ -109,8 +109,8 @@ module VagrantPlugins
         # VPN to use for connection to VM
         @vpn_url = nil if @vpn_url == UNSET_VALUE
 
-        # Set the default timeout for waiting for an instance to be ready
-        @instance_ready_timeout = 120 if @instance_ready_timeout == UNSET_VALUE
+        # Set the default timeout for runstate changes (e.g. running a VM)
+        @instance_ready_timeout = 300 if @instance_ready_timeout == UNSET_VALUE
 
         # Hardware settings default to nil (will be obtained
         # from the source VM)
