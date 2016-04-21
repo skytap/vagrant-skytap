@@ -184,14 +184,20 @@ en:
         verb_create_and_use: |-
           Create and use tunnel to host network
         errors:
-          host_network_not_tunnelable: |-
-            The host's network must be tunnelable.
-          host_network_nat_disabled: |-
-            The host's network must have NAT enabled.
+          host_network_not_connectable: |-
+            To connect to the guest machine using a network tunnel, the host
+            VM must be connected to a network which is visible to other
+            networks and has a NAT subnet. Please go to the network settings
+            page for this VM and make these changes, then run `vagrant up` to
+            try again. (Note: it may be necessary to power off this VM before
+            making these changes.)
           guest_network_overlaps: |-
-            The guest's network subnet overlaps with the host's network.
-            (This can be resolved by changing network subnets, or by
-            enabling NAT on the guest network.)
+            The host and guest networks could not be connected via a network
+            tunnel because the guest VM's network subnet (%{guest_subnet})
+            overlaps with the host network subnet (%{host_subnet}). Please
+            change the guest network's subnet, or enable NAT on the guest
+            network's subnet, then run `vagrant up` to try again.
+            The guest VM's environment URL is: %{environment_url}
 
     commands:
       publish_urls:
