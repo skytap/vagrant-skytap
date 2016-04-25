@@ -1,3 +1,9 @@
+# 0.3.3 (April 25, 2016)
+
+* Improve error messaging for network tunnels.
+* Change default timeout value.
+* Update Vagrantfile for example box file.
+
 # 0.3.2 (April 19, 2016)
 
 * Retry all operations on 423 response (previously this was not happening when attaching to a VPN).
