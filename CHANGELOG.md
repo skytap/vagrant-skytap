@@ -1,3 +1,7 @@
+# 0.3.4 (April 27, 2016)
+
+* Add handling for additional network errors when fetching Skytap VM metadata.
+
 # 0.3.3 (April 25, 2016)
 
 * Improve error messaging for network tunnels.
