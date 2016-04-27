@@ -71,6 +71,10 @@ module VagrantPlugins
               logger.debug("Could not resolve hostname '#{host}'.")
             rescue Errno::ENETUNREACH => ex
               logger.debug("No route exists for '#{host}'.")
+            rescue Errno::EHOSTDOWN => ex
+              logger.debug("The OS reported that '#{host}' is down.")
+            rescue Errno::ECONNREFUSED => ex
+              logger.debug("The connection was refused by '#{host}'.")
             rescue Timeout::Error => ex
               logger.debug("Response timed out for '#{host}'.")
             rescue JSON::ParserError
