@@ -29,8 +29,8 @@ module VagrantPlugins
     module Cap
       module HostMetadata
         METADATA_LINK_LOCAL_ADDRESS = '169.254.169.254'
-        OPEN_TIMEOUT = 2
-        READ_TIMEOUT = 5
+        OPEN_TIMEOUT = 5
+        READ_TIMEOUT = 15
 
         # If Vagrant is running in a Skytap VM, returns metadata from which an
         # [API::Vm] can be constructed. Otherwise returns nil.
@@ -40,10 +40,10 @@ module VagrantPlugins
         def self.host_metadata(machine)
           logger = Log4r::Logger.new("vagrant_skytap::cap::host_metadata")
 
-          # There are two addresses to try for the metadata service. If using
-          # the default DNS, 'gw' will resolve to the endpoint address. If
-          # using custom DNS, be prepared to fall back to the hard-coded IP
-          # address.
+          # A Skytap VM can request information about itself from the metadata
+          # service at http://gw/skytap. If the network is set to use custom
+          # DNS, 'gw' may resolve to something else, in which case we fall back
+          # to the service's link local address.
           ['gw', METADATA_LINK_LOCAL_ADDRESS].each do |host|
             begin
               http = Net::HTTP.new(host)
@@ -52,36 +52,36 @@ module VagrantPlugins
 
               # Test for a working web server before actually hitting the
               # metadata service. The response is expected to be 404.
+              logger.debug("Checking for HTTP service on host '#{host}' ...")
               http.request(Net::HTTP::Get.new("/"))
 
               begin
+                logger.debug("Fetching VM metadata from http://#{host}/skytap ...")
                 response = http.request(Net::HTTP::Get.new("/skytap"))
               rescue Timeout::Error => ex
+                logger.debug("The request timed out.")
                 raise Errors::MetadataServiceUnavailable
               end
 
-              if response.is_a?(Net::HTTPServerError)
-                raise Errors::MetadataServiceUnavailable
-              elsif response.is_a?(Net::HTTPOK)
-                attrs = JSON.parse(response.body)
-                return attrs if attrs.key?('configuration_url')
-                logger.debug("The JSON retrieved was not VM metadata! Ignoring.")
+              if response.is_a?(Net::HTTPOK)
+                if (attrs = JSON.parse(response.body)) && attrs.key?('configuration_url')
+                  logger.debug('Metadata retrieved successfully.')
+                  return attrs
+                end
+                logger.debug('The response did not contain VM metadata.')
+                logger.debug("Response body: #{response.body}")
+              else
+                logger.debug("The server responded with status #{response.code}.")
+                logger.debug("Response body: #{response.body}")
+                raise Errors::MetadataServiceUnavailable if response.is_a?(Net::HTTPServerError)
               end
-            rescue SocketError => ex
-              logger.debug("Could not resolve hostname '#{host}'.")
-            rescue Errno::ENETUNREACH => ex
-              logger.debug("No route exists for '#{host}'.")
-            rescue Errno::EHOSTDOWN => ex
-              logger.debug("The OS reported that '#{host}' is down.")
-            rescue Errno::ECONNREFUSED => ex
-              logger.debug("The connection was refused by '#{host}'.")
-            rescue Timeout::Error => ex
-              logger.debug("Response timed out for '#{host}'.")
-            rescue JSON::ParserError
-              logger.debug("Response from '#{host}' was garbled.")
+            rescue SystemCallError, SocketError, Timeout::Error, JSON::ParserError => ex
+              logger.debug(ex)
+              logger.debug("Response body: #{response.body}") if response.try(:body)
             end
           end
 
+          logger.debug("Could not obtain VM metadata. Host is not a Skytap VM.")
           nil
         end
       end
