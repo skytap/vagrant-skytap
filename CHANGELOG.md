@@ -1,3 +1,8 @@
+# 0.3.5 (January 3, 2017)
+
+* Increase metadata service timeout, improve logging, handle still more errors (actually
+  rescue all system call errors)
+
 # 0.3.4 (April 27, 2016)
 
 * Add handling for additional network errors when fetching Skytap VM metadata.
@@ -22,7 +27,7 @@
 * New functionality to support running Vagrant from within a Skytap VM. The connection between host and
   guest will be made over a network tunnel between the two Skytap environments.
 * `vagrant ssh` now shows the expected error when the machine is not running.
-* Support unattended `vagrant up` by automatically choosing the only available connection option.  
+* Support unattended `vagrant up` by automatically choosing the only available connection option.
 
 # 0.2.10 (March 17, 2016)
 
