@@ -51,19 +51,16 @@ module VagrantPlugins
         def valid?
           @validation_error_message = nil
 
-          unless host_network.tunnelable?
-            @validation_error_message = I18n.t("vagrant_skytap.connections.tunnel.errors.host_network_not_tunnelable")
-            return false
-          end
-
-          unless host_network.nat_enabled?
-            @validation_error_message = I18n.t("vagrant_skytap.connections.tunnel.errors.host_network_nat_disabled")
+          unless host_network.tunnelable? && host_network.nat_enabled?
+            @validation_error_message = I18n.t("vagrant_skytap.connections.tunnel.errors.host_network_not_connectable")
             return false
           end
 
           unless guest_network.nat_enabled?
             if guest_network.subnet.overlaps?(host_network.subnet)
-              @validation_error_message = I18n.t("vagrant_skytap.connections.tunnel.errors.guest_network_overlaps")
+              @validation_error_message = I18n.t("vagrant_skytap.connections.tunnel.errors.guest_network_overlaps",
+                                                 guest_subnet: guest_network.subnet, host_subnet: host_network.subnet,
+                                                 environment_url: iface.vm.environment.url)
               return false
             end
           end
