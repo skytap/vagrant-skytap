@@ -125,7 +125,7 @@ module VagrantPlugins
             end
           rescue Timeout::Error => ex
             raise most_recent_exception if most_recent_exception
-            raise Errors::OperationFailed, "Timeout exceeded"
+            raise Errors::OperationFailed, err: "Timeout exceeded"
           end
         end
 
