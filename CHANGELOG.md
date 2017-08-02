@@ -1,3 +1,10 @@
+# 0.3.6 (August 2, 2017)
+
+* Parameterize some Gemfile entries for testing purposes.
+* Fix bug which limited the number of guest VMs to 3 when the host is also a 
+  Skytap VM.
+* Fix a bug in timeout error handling.
+
 # 0.3.5 (January 3, 2017)
 
 * Increase metadata service timeout, improve logging, handle still more errors (actually
