@@ -37,7 +37,7 @@ module VagrantPlugins
 
         def call(env)
           unless env[:vagrant_host_vm]
-            if metadata = env[:machine].provider.capability(:host_metadata)
+            if (metadata = env[:machine].provider.host_metadata)
               # The environment will be lazy loaded
               env[:vagrant_host_vm] = vm = API::Vm.new(metadata, nil, env)
               @logger.info("Running Vagrant in a Skytap VM. ID: #{vm.try(:id)}")
