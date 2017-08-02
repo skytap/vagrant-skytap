@@ -26,6 +26,9 @@ require "vagrant"
 module VagrantPlugins
   module Skytap
     class Provider < Vagrant.plugin("2", :provider)
+      @@host_metadata = nil
+      @@host_metadata_fetch_attempted = false
+
       def initialize(machine)
         @machine = machine
       end
@@ -61,6 +64,14 @@ module VagrantPlugins
 
         # Return the MachineState object
         Vagrant::MachineState.new(state_id, short, long)
+      end
+
+      def host_metadata
+        unless @@host_metadata_fetch_attempted
+          @@host_metadata = capability(:host_metadata)
+          @@host_metadata_fetch_attempted = true
+        end
+        @@host_metadata
       end
 
       def to_s
