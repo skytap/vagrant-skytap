@@ -23,7 +23,6 @@
 require "log4r"
 #require 'vagrant'
 require 'vagrant-skytap/api/vm'
-#require 'vagrant-skytap/api/runstate_operations'
 require_relative 'action_helpers'
 
 module VagrantPlugins

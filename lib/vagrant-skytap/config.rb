@@ -80,6 +80,16 @@ module VagrantPlugins
       # @return [Array]
       attr_accessor :disks
 
+      # The Skytap Environment Name.
+      #
+      # @return [String]
+      attr_accessor :environment_name
+
+      # The Skytap Project to assign Environment.
+      #
+      # @return [String]
+      attr_accessor :project_id
+
       def initialize(region_specific=false)
         @username               = UNSET_VALUE
         @api_token              = UNSET_VALUE
@@ -88,6 +98,8 @@ module VagrantPlugins
         @vpn_url                = UNSET_VALUE
         @instance_ready_timeout = UNSET_VALUE
         @region                 = UNSET_VALUE
+        @environment_name       = UNSET_VALUE
+        @project_id             = UNSET_VALUE
 
         @cpus                   = UNSET_VALUE
         @cpuspersocket          = UNSET_VALUE
@@ -117,6 +129,12 @@ module VagrantPlugins
 
         # Set the default timeout for runstate changes (e.g. running a VM)
         @instance_ready_timeout = 300 if @instance_ready_timeout == UNSET_VALUE
+
+        # Default Environment name
+        @environment_name = "Default Environment Name" if @environment_name == UNSET_VALUE
+
+        # Project ID defaults to nil
+        @project_id = nil if @project_id == UNSET_VALUE
 
         # Hardware settings default to nil (will be obtained
         # from the source VM)
