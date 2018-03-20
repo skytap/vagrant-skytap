@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 gemspec
 
-VAGRANT_GEM_TAG = ENV['VAGRANT_GEM_TAG'] || 'v1.7.4'
+VAGRANT_GEM_TAG = ENV['VAGRANT_GEM_TAG'] || 'v1.9.1'
 # vagrant-spec made a change in 1d09951e which created a dependency conflict
 # in our test environment. For now, default to the preceding revision.
 VAGRANT_SPEC_GEM_REF = ENV['VAGRANT_SPEC_REF'] || '5006bc73'
@@ -26,6 +26,6 @@ group :development do
   gem "rspec-expectations", "~> 2.14.0"
 end
 
-group :plugins do
-  gem "vagrant-skytap", path: "."
-end
+#group :plugins do
+#  gem "vagrant-skytap", path: "."
+#end

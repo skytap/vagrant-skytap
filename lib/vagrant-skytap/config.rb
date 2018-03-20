@@ -75,6 +75,11 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :guestos
 
+      # The VMware guest OS setting for this machine.
+      #
+      # @return [Array]
+      attr_accessor :disks
+
       def initialize(region_specific=false)
         @username               = UNSET_VALUE
         @api_token              = UNSET_VALUE
@@ -88,6 +93,7 @@ module VagrantPlugins
         @cpuspersocket          = UNSET_VALUE
         @ram                    = UNSET_VALUE
         @guestos                = UNSET_VALUE
+        @disks                  = UNSET_VALUE
       end
 
       #-------------------------------------------------------------------
@@ -118,6 +124,7 @@ module VagrantPlugins
         @cpuspersocket = nil if @cpuspersocket == UNSET_VALUE
         @ram           = nil if @ram           == UNSET_VALUE
         @guestos       = nil if @guestos       == UNSET_VALUE
+        @disks         = nil if @disks         == UNSET_VALUE
 
         # Mark that we finalized
         @__finalized = true
