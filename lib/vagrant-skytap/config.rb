@@ -130,10 +130,8 @@ module VagrantPlugins
         # Set the default timeout for runstate changes (e.g. running a VM)
         @instance_ready_timeout = 300 if @instance_ready_timeout == UNSET_VALUE
 
-        # Default Environment name
-        @environment_name = "Default Environment Name" if @environment_name == UNSET_VALUE
-
-        # Project ID defaults to nil
+        # Environment Name and Project ID default to nil
+        @environment_name = nil if @environment_name == UNSET_VALUE
         @project_id = nil if @project_id == UNSET_VALUE
 
         # Hardware settings default to nil (will be obtained

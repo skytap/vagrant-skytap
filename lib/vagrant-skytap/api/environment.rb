@@ -55,7 +55,9 @@ module VagrantPlugins
               else
                 ret[:configuration_id] = vm.configuration_id
               end
-              ret[:name] = provider_config.environment_name
+              unless provider_config.environment_name.nil?
+                ret[:name] = provider_config.environment_name
+              end
               unless provider_config.project_id.nil?
                 ret[:project_id] = provider_config.project_id
               end

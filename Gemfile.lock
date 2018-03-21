@@ -35,7 +35,7 @@ GIT
 PATH
   remote: .
   specs:
-    vagrant-skytap (0.3.6)
+    vagrant-skytap (0.3.7)
       json_pure
 
 GEM

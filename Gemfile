@@ -26,6 +26,6 @@ group :development do
   gem "rspec-expectations", "~> 2.14.0"
 end
 
-#group :plugins do
-#  gem "vagrant-skytap", path: "."
-#end
+group :plugins do
+  gem "vagrant-skytap", path: "."
+end
