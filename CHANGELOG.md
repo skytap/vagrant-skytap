@@ -1,7 +1,13 @@
+# 0.3.7 (March 21, 2018)
+
+* Add disks to a VM if provided.
+* Apply custom name to new environmeht if provided.
+* Add new environment to Project ID if provided.
+
 # 0.3.6 (August 2, 2017)
 
 * Parameterize some Gemfile entries for testing purposes.
-* Fix bug which limited the number of guest VMs to 3 when the host is also a 
+* Fix bug which limited the number of guest VMs to 3 when the host is also a
   Skytap VM.
 * Fix a bug in timeout error handling.
 

@@ -40,12 +40,15 @@ Before you begin, make sure you have:
       config.vm.provider :skytap do |skytap, override|
         skytap.username = "<username>"
         skytap.api_token = "<api_token>"
+        skytap.environment_name = "<environment name>"
+        skytap.project_id = "<project id>"
       end
 
       config.vm.define "web" do |server|
         server.vm.provider :skytap do |box|
           box.vm_url = "https://cloud.skytap.com/vms/3157858"
           box.cpus = 2
+          box.disks = [25600,51200]
         end
       end
     end
@@ -177,6 +180,9 @@ For more information, see [https://www.vagrantup.com/docs/networking/forwarded_p
 |ram                   | no      | RAM (megabytes).|
 |guestos               | no      | The VMware guest OS for the virtual machine.|
 |vpn_url               | no      | The URL of the Skytap VPN to use when connecting to the VM.|
+|disks                 | no      | List of disk sizes to add to VM.|
+|environment_name      | no      | Name to give the new environment.|
+|project_id            | no      | Project to add new envrionment to.|
 
 Notes:
 

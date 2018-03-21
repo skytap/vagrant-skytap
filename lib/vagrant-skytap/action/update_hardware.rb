@@ -52,6 +52,20 @@ module VagrantPlugins
               @logger.info("Updating hardware properties: #{hardware_info}")
               vm.update(hardware: hardware_info)
             end
+
+            unless provider_config.disks.nil?
+              disks_info = Hash.new
+              disks_info[:new] = provider_config.disks
+              hardware_info = {
+                disks:         disks_info,
+              }.reject{|k, v| v.nil? || v == vm.hardware[k.to_s]}
+
+              if hardware_info.present?
+                @logger.info("Updating hardware properties: #{hardware_info}")
+                vm.update(hardware: hardware_info)
+                vm.wait_for_runstate(:stopped)
+              end
+            end
           end
 
           @app.call(env)
