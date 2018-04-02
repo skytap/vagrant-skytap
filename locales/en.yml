@@ -125,6 +125,9 @@ en:
         You appear to be running Vagrant in a Skytap VM. There was an error retrieving
         information about this VM. Please retry later.
 
+      fetch_environment_is_undefined: |-
+        The command failed because the environment does not exist. Run `vagrant up` to create the environment.
+
     states:
       short_not_created: |-
         not created

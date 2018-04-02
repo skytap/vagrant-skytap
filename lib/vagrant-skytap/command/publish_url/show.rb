@@ -21,6 +21,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 require 'vagrant-skytap/command/helpers'
+require "log4r"
 
 module VagrantPlugins
   module Skytap
@@ -30,19 +31,25 @@ module VagrantPlugins
           include Command::Helpers
 
           def execute
-            if publish_sets = fetch_environment.publish_sets.presence
-              results = publish_sets.collect do |ps|
-                "#{ps.desktops_url || 'n/a'}\n" \
-                  "  VMs: #{machine_names(ps.vm_ids).join(', ').presence || '(none)'}" \
-                  "  Password protected? #{ps.password_protected? ? 'yes' : 'no'}"
+            logger = Log4r::Logger.new("vagrant_skytap::command::publish_url::show")
+            begin
+              if publish_sets = fetch_environment.publish_sets.presence
+                results = publish_sets.collect do |ps|
+                  "#{ps.desktops_url || 'n/a'}\n" \
+                    "  VMs: #{machine_names(ps.vm_ids).join(', ').presence || '(none)'}" \
+                    "  Password protected? #{ps.password_protected? ? 'yes' : 'no'}"
+                end
+                @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.list", publish_urls: results.join("\n")))
+              else
+                @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.empty_list"))
               end
-              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.list", publish_urls: results.join("\n")))
-            else
-              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.empty_list"))
-            end
 
-            # Success, exit status 0
-            0
+              # Success, exit status 0
+              0
+            rescue NoMethodError => ex
+              logger.info("The command failed because the environment does not exist. Run `vagrant up` to create the environment.")
+              raise Errors::FetchEnvironmentIsUndefined
+            end
           end
         end
       end
