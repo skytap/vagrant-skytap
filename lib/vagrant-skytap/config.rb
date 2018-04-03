@@ -93,6 +93,7 @@ module VagrantPlugins
         @cpuspersocket          = UNSET_VALUE
         @ram                    = UNSET_VALUE
         @guestos                = UNSET_VALUE
+        @environment_name       = UNSET_VALUE
       end
 
       #-------------------------------------------------------------------
