@@ -75,6 +75,11 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :guestos
 
+      # The Name to use for this machine.
+      #
+      # @return [String]
+      attr_accessor :vm_name
+
       def initialize(region_specific=false)
         @username               = UNSET_VALUE
         @api_token              = UNSET_VALUE
@@ -88,6 +93,7 @@ module VagrantPlugins
         @cpuspersocket          = UNSET_VALUE
         @ram                    = UNSET_VALUE
         @guestos                = UNSET_VALUE
+        @vm_name                = UNSET_VALUE
       end
 
       #-------------------------------------------------------------------
@@ -118,6 +124,9 @@ module VagrantPlugins
         @cpuspersocket = nil if @cpuspersocket == UNSET_VALUE
         @ram           = nil if @ram           == UNSET_VALUE
         @guestos       = nil if @guestos       == UNSET_VALUE
+
+        # VM Name default to nil
+        @vm_name = nil if @vm_name == UNSET_VALUE
 
         # Mark that we finalized
         @__finalized = true
