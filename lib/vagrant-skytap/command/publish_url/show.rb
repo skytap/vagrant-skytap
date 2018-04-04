@@ -21,7 +21,6 @@
 # DEALINGS IN THE SOFTWARE.
 
 require 'vagrant-skytap/command/helpers'
-require "log4r"
 
 module VagrantPlugins
   module Skytap
@@ -31,7 +30,6 @@ module VagrantPlugins
           include Command::Helpers
 
           def execute
-            logger = Log4r::Logger.new("vagrant_skytap::command::publish_url::show")
             environment = fetch_environment
             if (environment).nil?
               @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.fetch_environment_is_undefined"))
