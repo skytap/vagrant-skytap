@@ -227,6 +227,8 @@ en:
           created through the Skytap UI) have been deleted. Users cannot
           manage these VMs, or access them through SmartClient, unless they
           have a Skytap user account with appropriate permissions.
+        fetch_environment_is_undefined: |-
+          The command failed because the environment does not exist. Run `vagrant up` to create the environment.
       halt:
         not_allowed_if_suspended: |-
           Suspended machines cannot be halted gracefully. Run `vagrant up`

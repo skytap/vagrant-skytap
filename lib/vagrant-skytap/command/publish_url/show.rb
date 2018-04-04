@@ -30,7 +30,10 @@ module VagrantPlugins
           include Command::Helpers
 
           def execute
-            if publish_sets = fetch_environment.publish_sets.presence
+            environment = fetch_environment
+            if (environment).nil?
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.fetch_environment_is_undefined"))
+            elsif publish_sets = environment.publish_sets.presence
               results = publish_sets.collect do |ps|
                 "#{ps.desktops_url || 'n/a'}\n" \
                   "  VMs: #{machine_names(ps.vm_ids).join(', ').presence || '(none)'}" \
