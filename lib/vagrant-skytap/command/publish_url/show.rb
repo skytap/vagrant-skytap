@@ -32,24 +32,23 @@ module VagrantPlugins
 
           def execute
             logger = Log4r::Logger.new("vagrant_skytap::command::publish_url::show")
-            begin
-              if publish_sets = fetch_environment.publish_sets.presence
-                results = publish_sets.collect do |ps|
-                  "#{ps.desktops_url || 'n/a'}\n" \
-                    "  VMs: #{machine_names(ps.vm_ids).join(', ').presence || '(none)'}" \
-                    "  Password protected? #{ps.password_protected? ? 'yes' : 'no'}"
-                end
-                @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.list", publish_urls: results.join("\n")))
-              else
-                @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.empty_list"))
-              end
-
-              # Success, exit status 0
-              0
-            rescue NoMethodError => ex
-              logger.info("The command failed because the environment does not exist. Run `vagrant up` to create the environment.")
+            environment = fetch_environment
+            if (environment).nil?
               raise Errors::FetchEnvironmentIsUndefined
             end
+            if publish_sets = environment.publish_sets.presence
+              results = publish_sets.collect do |ps|
+                "#{ps.desktops_url || 'n/a'}\n" \
+                  "  VMs: #{machine_names(ps.vm_ids).join(', ').presence || '(none)'}" \
+                  "  Password protected? #{ps.password_protected? ? 'yes' : 'no'}"
+              end
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.list", publish_urls: results.join("\n")))
+            else
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.empty_list"))
+            end
+
+            # Success, exit status 0
+            0
           end
         end
       end
