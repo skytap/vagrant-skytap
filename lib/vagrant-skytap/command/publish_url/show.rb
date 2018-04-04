@@ -34,9 +34,8 @@ module VagrantPlugins
             logger = Log4r::Logger.new("vagrant_skytap::command::publish_url::show")
             environment = fetch_environment
             if (environment).nil?
-              raise Errors::FetchEnvironmentIsUndefined
-            end
-            if publish_sets = environment.publish_sets.presence
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.fetch_environment_is_undefined"))
+            elsif publish_sets = environment.publish_sets.presence
               results = publish_sets.collect do |ps|
                 "#{ps.desktops_url || 'n/a'}\n" \
                   "  VMs: #{machine_names(ps.vm_ids).join(', ').presence || '(none)'}" \

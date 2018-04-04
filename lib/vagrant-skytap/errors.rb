@@ -104,10 +104,6 @@ module VagrantPlugins
       class MetadataServiceUnavailable < VagrantSkytapError
         error_key(:metadata_service_unavailable)
       end
-
-      class FetchEnvironmentIsUndefined < VagrantSkytapError
-        error_key(:fetch_environment_is_undefined)
-      end
     end
   end
 end
