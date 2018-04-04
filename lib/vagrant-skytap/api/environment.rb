@@ -48,11 +48,15 @@ module VagrantPlugins
             check_vms_before_adding(vms)
             vm = vms.first
 
+            provider_config = env[:machine].provider_config
             args = {vm_ids: vms.collect(&:id)}.tap do |ret|
               if vm.from_template?
                 ret[:template_id] = vm.template_id
               else
                 ret[:configuration_id] = vm.configuration_id
+              end
+              unless provider_config.environment_name.nil?
+                ret[:name] = provider_config.environment_name
               end
             end
 
