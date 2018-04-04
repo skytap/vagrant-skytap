@@ -80,6 +80,11 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :environment_name
 
+      # The Name to use for this machine.
+      #
+      # @return [String]
+      attr_accessor :vm_name
+
       def initialize(region_specific=false)
         @username               = UNSET_VALUE
         @api_token              = UNSET_VALUE
@@ -94,6 +99,7 @@ module VagrantPlugins
         @ram                    = UNSET_VALUE
         @guestos                = UNSET_VALUE
         @environment_name       = UNSET_VALUE
+        @vm_name                = UNSET_VALUE
       end
 
       #-------------------------------------------------------------------
@@ -127,6 +133,9 @@ module VagrantPlugins
 
         # Environment Name default to nil
         @environment_name = nil if @environment_name == UNSET_VALUE
+        
+        # VM Name default to nil
+        @vm_name = nil if @vm_name == UNSET_VALUE
 
         # Mark that we finalized
         @__finalized = true

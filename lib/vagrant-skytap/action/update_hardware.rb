@@ -52,6 +52,10 @@ module VagrantPlugins
               @logger.info("Updating hardware properties: #{hardware_info}")
               vm.update(hardware: hardware_info)
             end
+
+            unless provider_config.vm_name.nil?
+              vm.update(name: provider_config.vm_name)
+            end
           end
 
           @app.call(env)
