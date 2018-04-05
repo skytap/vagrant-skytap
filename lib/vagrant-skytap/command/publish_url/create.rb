@@ -36,6 +36,8 @@ module VagrantPlugins
             opts = OptionParser.new do |o|
               o.banner = "Usage: vagrant publish-url create [options]"
               o.separator ""
+              o.separator "Share an environment via the Skytap Cloud UI."
+              o.separator ""
               o.separator "Options:"
               o.separator ""
 
@@ -44,7 +46,7 @@ module VagrantPlugins
                 options[:password] = p
               end
 
-              o.on("-np", "--no-password", "Do not set a password") do |np|
+              o.on("-n", "--no-password", "Do not set a password") do |n|
                 options[:no_password] = true
               end
 
@@ -62,20 +64,25 @@ module VagrantPlugins
             end
             password ||= ""
 
-            ps = fetch_environment.create_publish_set(
-              name: "Vagrant publish set",
-              publish_set_type: "single_url",
-              vms: target_skytap_vms.collect do |vm|
-                {
-                  vm_ref: vm.url,
-                  access: "run_and_use",
-                }
-              end,
-              password: password
-            )
-            @logger.debug("New publish set: #{ps.url}")
+            environment = fetch_environment
+            if (environment).nil?
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.fetch_environment_is_undefined"))
+            else
+              ps = environment.create_publish_set(
+                name: "Vagrant publish set",
+                publish_set_type: "single_url",
+                vms: target_skytap_vms.collect do |vm|
+                  {
+                    vm_ref: vm.url,
+                    access: "run_and_use",
+                  }
+                end,
+                password: password
+              )
+              @logger.debug("New publish set: #{ps.url}")
 
-            @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.created", url: ps.desktops_url))
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.created", url: ps.desktops_url))
+            end
 
             # Success, exit status 0
             0

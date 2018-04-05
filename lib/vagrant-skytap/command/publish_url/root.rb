@@ -74,6 +74,8 @@ module VagrantPlugins
             opts = OptionParser.new do |opts|
               opts.banner = "Usage: vagrant publish-url <subcommand> [<args>]"
               opts.separator ""
+              opts.separator "Manages Skytap sharing portals."
+              opts.separator ""
               opts.separator "Available subcommands:"
 
               # Add the available subcommands as separators in order to print them

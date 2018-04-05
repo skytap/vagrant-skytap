@@ -35,8 +35,8 @@ module VagrantPlugins
 
             opts = OptionParser.new do |o|
               o.separator ""
-              o.separator "Deletes all published URLs for this project, including any"
-              o.separator "created through the Skytap UI."
+              o.separator "Delete the sharing portal. Users can no longer access"
+              o.separator "the environment through the URL."
 
               o.banner = "Usage: vagrant publish-url delete [options]"
               o.separator ""
@@ -50,7 +50,10 @@ module VagrantPlugins
 
             return unless argv = parse_options(opts)
 
-            if publish_sets = fetch_environment.publish_sets.presence
+            environment = fetch_environment
+            if (environment).nil?
+              @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.fetch_environment_is_undefined"))
+            elsif publish_sets = environment.publish_sets.presence
               unless options[:force]
                 confirm = @env.ui.ask(I18n.t("vagrant_skytap.commands.publish_urls.confirm_delete"))
                 return unless confirm.downcase == 'y'

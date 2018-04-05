@@ -20,6 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+require 'optparse'
 require 'vagrant-skytap/command/helpers'
 
 module VagrantPlugins
@@ -30,6 +31,18 @@ module VagrantPlugins
           include Command::Helpers
 
           def execute
+            options = {}
+            opts = OptionParser.new do |o|
+              o.banner = "Usage: vagrant publish-url show [<args>]"
+              o.separator ""
+              o.separator "Show the sharing portal, the VMs included, and whether"
+              o.separator "the URL is password-protected."
+              o.separator ""
+              o.separator "Available subcommands:"
+            end
+
+            return unless argv = parse_options(opts)
+
             environment = fetch_environment
             if (environment).nil?
               @env.ui.info(I18n.t("vagrant_skytap.commands.publish_urls.fetch_environment_is_undefined"))
